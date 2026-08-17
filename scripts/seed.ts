@@ -158,10 +158,10 @@ async function seed() {
   // ── 4. Visitors ──
   console.log('\n── Visitors');
   const visitorRows = [
-    { phone: '9876543210', full_name: 'Rohan Desai',      company: 'TechSoft Pvt Ltd',  id_type: 'Aadhar', id_last4: '4321', is_blacklisted: false },
-    { phone: '9123456789', full_name: 'Kavita Joshi',     company: 'VendorCo',           id_type: 'PAN',    id_last4: '6789', is_blacklisted: false },
-    { phone: '9988776655', full_name: 'Mohan Das',        company: null,                 id_type: 'DL',     id_last4: '9900', is_blacklisted: false },
-    { phone: '9000000001', full_name: 'Blacklisted User', company: null,                 id_type: null,     id_last4: null,   is_blacklisted: true, blacklist_reason: 'Theft incident on 2025-01-10' },
+    { phone: '9876543210', full_name: 'Rohan Desai',      vendor_name: 'TechSoft Pvt Ltd',  id_type: 'Aadhar', id_last4: '4321', is_blacklisted: false },
+    { phone: '9123456789', full_name: 'Kavita Joshi',     vendor_name: 'VendorCo',           id_type: 'PAN',    id_last4: '6789', is_blacklisted: false },
+    { phone: '9988776655', full_name: 'Mohan Das',        vendor_name: null,                 id_type: 'DL',     id_last4: '9900', is_blacklisted: false },
+    { phone: '9000000001', full_name: 'Blacklisted User', vendor_name: null,                 id_type: null,     id_last4: null,   is_blacklisted: true, blacklist_reason: 'Theft incident on 2025-01-10' },
   ];
   const { data: visitors, error: visErr } = await admin
     .from('visitors')

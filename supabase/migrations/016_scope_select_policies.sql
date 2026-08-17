@@ -6,6 +6,7 @@
 
 -- 1) Storage bucket: only guard, admin, super_admin can read photos
 drop policy if exists "photos: authenticated can read" on storage.objects;
+drop policy if exists "photos: guard/admin can read" on storage.objects;
 create policy "photos: guard/admin can read"
   on storage.objects for select to authenticated
   using (
@@ -18,6 +19,7 @@ create policy "photos: guard/admin can read"
 -- Staff/HOD see profiles in their own department.
 -- Admin/super_admin see all.
 drop policy if exists "profiles: all authenticated can read" on public.profiles;
+drop policy if exists "profiles: read scoped by role" on public.profiles;
 create policy "profiles: read scoped by role"
   on public.profiles for select to authenticated
   using (
@@ -30,6 +32,7 @@ create policy "profiles: read scoped by role"
 -- Staff/HOD only see visitors that have visited their department.
 -- We use a subquery on visits to determine which visitors a HOD/staff can see.
 drop policy if exists "visitors: all authenticated can read" on public.visitors;
+drop policy if exists "visitors: read scoped by role" on public.visitors;
 create policy "visitors: read scoped by role"
   on public.visitors for select to authenticated
   using (

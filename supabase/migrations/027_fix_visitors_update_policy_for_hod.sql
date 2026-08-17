@@ -7,6 +7,7 @@
 
 drop policy if exists "visitors: guard/admin can update" on public.visitors;
 
+drop policy if exists "visitors: guard/hod/admin can update" on public.visitors;
 create policy "visitors: guard/hod/admin can update"
   on public.visitors for update to authenticated
   using ((auth.jwt() -> 'app_metadata' ->> 'role') in ('guard', 'hod', 'admin', 'super_admin'))

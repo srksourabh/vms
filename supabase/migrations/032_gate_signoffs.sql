@@ -24,10 +24,12 @@ create table public.gate_signoffs (
 
 alter table public.gate_signoffs enable row level security;
 
+drop policy if exists "gate_signoffs: guard can insert" on public.gate_signoffs;
 create policy "gate_signoffs: guard can insert"
   on public.gate_signoffs for insert to authenticated
   with check (true);
 
+drop policy if exists "gate_signoffs: authenticated can read" on public.gate_signoffs;
 create policy "gate_signoffs: authenticated can read"
   on public.gate_signoffs for select to authenticated
   using (true);

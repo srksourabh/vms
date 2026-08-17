@@ -82,6 +82,7 @@ create trigger gate_passes_update_rules
 
 -- ── 3. Visits SELECT scoped by role (replaces broad USING(true)) ────────────
 drop policy if exists "visits: all authenticated can read" on public.visits;
+drop policy if exists "visits: read scoped by role" on public.visits;
 create policy "visits: read scoped by role"
   on public.visits for select to authenticated
   using (
@@ -90,6 +91,7 @@ create policy "visits: read scoped by role"
   );
 
 -- ── 4. Visits INSERT: HOD may pre-approve visits for their own department ───
+drop policy if exists "visits: hod pre-approves own department" on public.visits;
 create policy "visits: hod pre-approves own department"
   on public.visits for insert to authenticated
   with check (
@@ -100,6 +102,7 @@ create policy "visits: hod pre-approves own department"
 
 -- ── 5. Gate passes INSERT: staff/hod restricted to own department ───────────
 drop policy if exists "gate_passes: staff/hod/guard/admin can insert" on public.gate_passes;
+drop policy if exists "gate_passes: insert scoped by role" on public.gate_passes;
 create policy "gate_passes: insert scoped by role"
   on public.gate_passes for insert to authenticated
   with check (
