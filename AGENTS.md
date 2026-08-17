@@ -5,35 +5,69 @@ authoritative product/codebase guide. This file only adds environment/run notes 
 
 ## Cursor Cloud specific instructions
 
-Single product: a Vite + React 18 + TypeScript SPA (`npm run dev`, port 5173) backed by an
-**external** Supabase project (auth, Postgres, RLS, realtime, storage). There is no local
-backend to run — Supabase is a hosted dependency. Standard commands live in `package.json`
-`scripts` (`dev`, `lint` = `tsc --noEmit`, `build`, `test`, `check`, `seed`); don't duplicate them.
+On-prem VMS: a Vite + React 18 + TypeScript SPA (`npm run dev`, port 5173) backed by a
+**self-hosted Supabase stack** run locally via the Supabase CLI (Docker). All data stays on
+the box — nothing leaves the premises. Standard commands live in `package.json` `scripts`
+(`dev`, `lint` = `tsc --noEmit`, `build`, `test`, `check`, `seed`); the Supabase CLI is a dev
+dependency, invoked as `npx supabase`.
 
-### Supabase env vars are required (not in the repo)
-- `src/supabaseClient.ts` builds the client at import from `VITE_SUPABASE_URL` /
-  `VITE_SUPABASE_ANON_KEY`. If `VITE_SUPABASE_URL` is unset, `@supabase/supabase-js` throws
-  `supabaseUrl is required` at import — so **~14 unit test files that transitively import the
-  client fail to even collect** until those two vars are set. Any non-empty values satisfy the
-  offline unit suite (it mocks the client / never hits the network); real values are only needed
-  to actually sign in or run the live integration tests below.
-- `vite.config.ts`'s dev-only `/api/*` proxy (departments/hosts admin helpers) and
-  `scripts/seed.ts` additionally need `SUPABASE_SERVICE_ROLE_KEY`.
-- Vite reads `VITE_`-prefixed vars from the real environment as well as a git-ignored `.env`
-  (`.env.example` is the template). Prefer setting them as injected env vars/secrets.
+### Bring the stack up (local / on-prem runbook)
+1. Docker must be running. This VM needs Docker installed (system dep, NOT in the update
+   script) with the `fuse-overlayfs` storage driver and `containerd-snapshotter: false`
+   (Docker 29); start it with `sudo dockerd` and `sudo chmod 666 /var/run/docker.sock`.
+2. `npx supabase start` — boots Postgres, Auth (GoTrue), PostgREST, Realtime, Storage, Studio
+   (`:54323`) and Mailpit (`:54324`). Migrations auto-apply on first boot.
+3. `.env` (git-ignored) must hold the values from `npx supabase status`:
+   `VITE_SUPABASE_URL=http://127.0.0.1:54321`, `VITE_SUPABASE_ANON_KEY=<anon JWT>`,
+   `SUPABASE_SERVICE_ROLE_KEY=<service_role JWT>`. Restart `npm run dev` after editing `.env`.
+4. `npx supabase db reset` re-applies every migration on a clean DB — this is the local
+   workflow (the old repo comment about "hand-applied, never db push" no longer holds; see
+   migrations note below). It wipes data, so re-run the seed after.
+5. `npm run seed` — demo departments, users (password `demo123`) and sample visits.
+6. `npm run dev` — app at http://localhost:5173.
 
-### Testing: which suite needs a live backend
-- `npm run check` (tsc + unit + `routeProtection` + `csp`) is the **offline-safe** gate and
-  passes with placeholder Supabase env values. Use it as the default verification loop.
-- `npm test` also runs `tests/security/{rls,rlsDataIntegrity,realtime,noShowWorkflow,lapsedRequests,auditLogsRls}.test.ts`,
-  which are **live integration tests**: they connect with `SUPABASE_SERVICE_ROLE_KEY` and log in
-  as the seeded demo users (`scripts/seed.ts`, password `demo123`). They fail without a real
-  Supabase project that has the migrations applied and `npm run seed` run against it.
+Demo logins (all `demo123`): `admin@demo.vms`, `guard@demo.vms`, `staff.it@demo.vms`
+(employee), `hod.it@demo.vms`.
+
+### Migrations are now replayable on a clean DB
+- `000_api_role_grants.sql` grants the PostgREST roles table access + default privileges —
+  on hosted Supabase the platform does this; a self-hosted DB must, or every query is
+  "permission denied for table". Keep it first.
+- Several drift-reconciliation files re-`create policy` an object an earlier file made;
+  `scripts/idempotent-policies.py` inserted a `drop policy if exists` before each so
+  `db reset` / `supabase start` apply cleanly. Do not remove those drops.
+
+### OTP visitor flow (the on-prem model)
+- Every visit gets a 6-digit `otp_code` at insert (trigger, migration 094). Pre-registration
+  (`pre_approve_visitor_v2`, now returns `otp_code` + takes `p_email`) dispatches it to the
+  visitor; approving a walk-in dispatches it to the security desk + notifies guards
+  (migration 094 trigger). Dispatch is logged in `public.otp_deliveries`.
+- The guard finds a visitor at the gate by typing the OTP — `lib/searchVisits.searchAllVisits`
+  matches `otp_code` exactly for a 4–8 digit query.
+- Email really sends: the dev/admin proxy `/api/send-email` (nodemailer) relays to Mailpit;
+  view captured mail at http://127.0.0.1:54324. SMS is recorded in `otp_deliveries` (wire a
+  local GSM gateway for a real send). `SMTP_HOST`/`SMTP_PORT`/`MAIL_FROM` env override the relay.
+
+### Admin user management runs through the dev proxy (service role)
+- Adding/removing employees & guards uses `/api/users` (+ `/api/departments`, `/api/send-email`)
+  served by `vite.config.ts`'s proxy using `SUPABASE_SERVICE_ROLE_KEY` server-side, so the key
+  never reaches the browser. **These endpoints exist only under `npm run dev`**; a production
+  build must provide the same endpoints from a small admin server. Client wrappers:
+  `lib/adminUsers.ts`; UI: `pages/Admin/UserManager.tsx` (Settings → Roles & Users).
+
+### Testing
+- `npm run check` (tsc + unit + `routeProtection` + `csp`) is the offline gate. With `.env`
+  pointed at the local stack the whole `npm test` (incl. `tests/security/*` live integration
+  tests) can run against the seeded local DB.
+- The guard **check-in photo step needs a webcam**; in a headless VM it errors with "camera
+  device not found". Validate check-in/check-out/badge-return via the API/DB if you can't use
+  a real camera — the flow is otherwise unchanged.
+- `tests/unit/pages/AdminLiveCheckIn.test.tsx` is time-of-day flaky right around IST midnight
+  (its fixtures use timestamps relative to `now()` against `istDayStart()`); it passes during
+  normal IST daytime. Not a code regression.
 
 ### Other gotchas
 - `npm run dev`/`npm run build` first run `predev`/`prebuild` = `scripts/sync-ort-assets.mjs`,
-  which copies the ~13 MB `onnxruntime-web` WASM runtime into `public/ort/` (git-ignored). This
-  requires deps installed; `vite.config.ts` has a matching middleware to serve `/ort/*`.
-- Migrations in `supabase/migrations/` (001–093) are **hand-applied to the live project**, in
-  order, with real traps (see `CLAUDE.md` → Migrations). This is NOT a `supabase db push` /
-  local-stack workflow; do not try to reconstruct the DB locally.
+  which copies the ~13 MB `onnxruntime-web` WASM runtime into `public/ort/` (git-ignored);
+  `vite.config.ts` has a matching middleware to serve `/ort/*`.
+- The CSP `connect-src` in `index.html` allows the local Supabase origin (`127.0.0.1:54321`).
