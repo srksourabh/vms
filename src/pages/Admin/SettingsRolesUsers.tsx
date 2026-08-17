@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import DepartmentsManager from './DepartmentsManager';
+import UserManager from './UserManager';
 
 // The Roles & Users section: departments, their heads of department, HOD
 // password resets and the activity log.
@@ -42,6 +43,8 @@ export default function SettingsRolesUsers(): React.ReactElement {
           Activity Log
         </Link>
       </div>
+
+      <UserManager />
 
       <DepartmentsManager />
     </div>
