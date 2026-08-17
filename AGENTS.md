@@ -44,6 +44,9 @@ Demo logins (all `demo123`): `admin@demo.vms`, `guard@demo.vms`, `staff.it@demo.
   (migration 094 trigger). Dispatch is logged in `public.otp_deliveries`.
 - The guard finds a visitor at the gate by typing the OTP — `lib/searchVisits.searchAllVisits`
   matches `otp_code` exactly for a 4–8 digit query.
+- Check-out can be done by typing the returned **badge number** on Entry & Exit
+  (`GuardLiveQueue` matches an on-site `visitor_card_number`, then the normal exit write); the
+  number is free to reissue afterwards.
 - Email really sends: the dev/admin proxy `/api/send-email` (nodemailer) relays to Mailpit;
   view captured mail at http://127.0.0.1:54324. SMS is recorded in `otp_deliveries` (wire a
   local GSM gateway for a real send). `SMTP_HOST`/`SMTP_PORT`/`MAIL_FROM` env override the relay.
