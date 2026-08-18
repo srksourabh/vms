@@ -6,6 +6,7 @@ import { istLocalToUtcIso } from '../../lib/istDateTime';
 import { safeErrorMessage } from '../../lib/errors';
 import { attachHostNames } from '../../lib/hostNames';
 import { useDepartments } from '../../lib/useDepartments';
+import { sendOtpEmail } from '../../lib/otpDelivery';
 import type { Visit, VisitorPurpose } from '../../types/index';
 import SuccessPopup from '../../components/SuccessPopup';
 import PreApprovalPass from '../../components/PreApprovalPass';
@@ -30,6 +31,7 @@ export default function PreApproveForm({ onPreApproved }: Props): React.ReactEle
   const [phone,       setPhone]       = useState('');
   const [fullName,    setFullName]    = useState('');
   const [vendorName,     setVendorName]     = useState('');
+  const [email,       setEmail]       = useState('');
   const [purpose,     setPurpose]     = useState<VisitorPurpose>('meeting');
   const [deptId,      setDeptId]      = useState('');
   const [hostId,      setHostId]      = useState('');
@@ -44,6 +46,8 @@ export default function PreApproveForm({ onPreApproved }: Props): React.ReactEle
   const [scheduledFor,    setScheduledFor]    = useState<string>('');
   const [expectedDeparture, setExpectedDeparture] = useState<string>('');
   const [successPopup,    setSuccessPopup]    = useState<{ title: string; refNumber: string } | null>(null);
+  const [otp,             setOtp]             = useState<string | null>(null);
+  const [otpEmailStatus,  setOtpEmailStatus]  = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
   const [passVisit,       setPassVisit]       = useState<Visit | null>(null);
   const [activeVisitCheck, setActiveVisitCheck] = useState<{ checking: boolean; message: string | null }>({ checking: false, message: null });
 
@@ -70,7 +74,11 @@ export default function PreApproveForm({ onPreApproved }: Props): React.ReactEle
     if (hit) { setBlacklistHit(hit.reason); return; }
     setBlacklistHit(null);
     const { data } = await supabase.from('visitors').select('*').eq('phone', normalized).maybeSingle();
-    if (data) { setFullName(data.full_name); setVendorName(data.vendor_name ?? ''); }
+    if (data) {
+      setFullName(data.full_name);
+      setVendorName(data.vendor_name ?? '');
+      if (data.email) setEmail(data.email);
+    }
   }, [phone, blacklist]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -119,10 +127,23 @@ export default function PreApproveForm({ onPreApproved }: Props): React.ReactEle
       };
       if (scheduledUtc) params.p_scheduled_for = scheduledUtc;
       if (departureUtc) params.p_expected_departure = departureUtc;
+      if (email.trim()) params.p_email = email.trim();
       const { data: result, error: rpcErr } = await (supabase as any)
         .rpc('pre_approve_visitor_v2', params);
       if (rpcErr) throw rpcErr;
       if (!result?.ref_number) throw new Error('Failed to create pre-approved visit.');
+      // The visit OTP (server-minted) is what the visitor tells the guard at
+      // the gate. Show it, and dispatch it by email through the on-prem relay.
+      const otpCode: string | null = result.otp_code ?? null;
+      setOtp(otpCode);
+      if (otpCode && email.trim()) {
+        setOtpEmailStatus('sending');
+        void sendOtpEmail({ to: email.trim(), visitorName: fullName, otp: otpCode, refNumber: result.ref_number })
+          .then((ok) => setOtpEmailStatus(ok ? 'sent' : 'failed'))
+          .catch(() => setOtpEmailStatus('failed'));
+      } else {
+        setOtpEmailStatus('idle');
+      }
       // The pass preview is a bonus for handoff/testing, not the point of
       // pre-approval — a failed fetch here must never block or error out a
       // pre-approval that has already succeeded.
@@ -145,6 +166,8 @@ export default function PreApproveForm({ onPreApproved }: Props): React.ReactEle
   const handlePopupClose = useCallback(() => {
     setSuccessPopup(null);
     setPassVisit(null);
+    setOtp(null);
+    setOtpEmailStatus('idle');
     if (successPopup) {
       onPreApproved(fullName, successPopup.refNumber);
     }
@@ -185,6 +208,7 @@ export default function PreApproveForm({ onPreApproved }: Props): React.ReactEle
         </div>
         <div><label className="label">Visitor Name *</label><input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} className="input" /></div>
         <div><label className="label">Vendor Name / Coming from *</label><input type="text" required value={vendorName} onChange={(e) => setVendorName(e.target.value)} className="input" /></div>
+        <div><label className="label">Email (for OTP)</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="visitor@example.com" className="input" /></div>
         <div>
           <label className="label">Purpose *</label>
           <select required value={purpose} onChange={(e) => setPurpose(e.target.value as VisitorPurpose)} className="input">
@@ -230,6 +254,23 @@ export default function PreApproveForm({ onPreApproved }: Props): React.ReactEle
 
       {successPopup && (
         <SuccessPopup title={successPopup.title} onClose={handlePopupClose}>
+          {otp && (
+            <div className="mb-4 rounded-xl border-2 border-brand-500/30 bg-brand-50 dark:bg-brand-500/10 p-4 text-center">
+              <p className="text-xs font-semibold uppercase tracking-wide text-navy-600 dark:text-navy-300">Visitor OTP</p>
+              <p className="text-3xl font-black tracking-[0.3em] text-brand-700 dark:text-brand-300 mt-1">{otp}</p>
+              <p className="text-xs text-navy-600 dark:text-navy-400 mt-2">
+                Sent by SMS to <span className="font-semibold">{phone || 'the visitor'}</span>
+                {email.trim() && (
+                  <> and by email to <span className="font-semibold">{email.trim()}</span>{' '}
+                    {otpEmailStatus === 'sending' && <span className="text-navy-400">(sending…)</span>}
+                    {otpEmailStatus === 'sent' && <span className="text-emerald-600">(email sent)</span>}
+                    {otpEmailStatus === 'failed' && <span className="text-amber-600">(email queued — relay offline)</span>}
+                  </>
+                )}
+              </p>
+              <p className="text-xs text-navy-500 dark:text-navy-400 mt-1">The visitor gives this OTP to security at the gate.</p>
+            </div>
+          )}
           {passVisit && <PreApprovalPass visit={passVisit} showIdProof={false} />}
         </SuccessPopup>
       )}

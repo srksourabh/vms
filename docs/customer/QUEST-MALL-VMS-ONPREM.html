@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quest Mall Secure Gate — on-premise delivery pack</title>
+  <style>
+    :root { --gold:#C6A15B; --navy:#16161A; --ink:#222; --muted:#5c564e; }
+    body { margin:0; font-family:"Segoe UI",system-ui,serif; color:var(--ink); background:#f4efe6; }
+    main { max-width:860px; margin:0 auto; padding:48px 28px 96px; background:#fff; }
+    h1 { font-size:34px; margin:0 0 8px; }
+    h2 { font-size:22px; color:#6a5428; border-top:1px solid #e6dcc8; padding-top:28px; margin-top:36px; }
+    h3 { font-size:17px; margin:22px 0 8px; }
+    p, li { line-height:1.55; }
+    .kicker { letter-spacing:.2em; text-transform:uppercase; font-size:11px; color:var(--gold); }
+    table { border-collapse:collapse; width:100%; margin:12px 0 20px; font-size:14px; }
+    th, td { border:1px solid #e6dcc8; padding:8px 10px; text-align:left; vertical-align:top; }
+    th { background:#f7f1e6; }
+    code, kbd { font-family:ui-monospace,Consolas,monospace; font-size:13px; background:#f7f1e6; padding:1px 5px; }
+    .shot { width:100%; border:1px solid #e6dcc8; border-radius:8px; margin:12px 0 8px; }
+    figcaption { font-size:13px; color:var(--muted); margin-bottom:20px; }
+    .note { background:#f7f1e6; border-left:4px solid var(--gold); padding:12px 16px; }
+    svg.flow, svg.flow-detail { width:100%; height:auto; }
+    @media print { body { background:#fff; } main { padding:0; } }
+  </style>
+</head>
+<body>
+<main>
+  <p class="kicker">Quest Mall · Customer delivery</p>
+  <h1>Secure Gate — holistic on-premise pack</h1>
+  <p>This document is the brief you can leave with the customer. It covers how we think about the product, the visitor journey, how Quest Mall benefits, what we would add next, cloud versus premises, and exactly how the database is installed inside the building. The click-path video and the slide deck sit beside it.</p>
+  <ul>
+    <li>Slide deck: <code>docs/customer/presentation.html</code> (arrow keys)</li>
+    <li>Desktop / Windows: <code>desktop/</code> and <code>installer/windows/</code></li>
+    <li>Mobile PWA: install from the same LAN URL (production build)</li>
+  </ul>
+
+  <h2>1. How we are thinking about this</h2>
+  <p>A mall gate is not a website with a login. It is a physical exchange: a person, a card, a host, a time. The product is built so that:</p>
+  <ul>
+    <li><strong>The employee books.</strong> They already know who is coming. They type name, mobile, email, date and time. The system mints an OTP.</li>
+    <li><strong>The visitor arrives with that OTP.</strong> They do not need an app. They speak the six digits.</li>
+    <li><strong>Security proves identity.</strong> ID scan (or typed last-four if the camera cannot read the card), live photograph, then a physical badge number typed in. Only then is the person checked in.</li>
+    <li><strong>The badge is an asset.</strong> It is issued at entry and demanded at exit. Typing the returned number closes the visit and frees the badge for the next person.</li>
+    <li><strong>Walk-ins still have a host.</strong> Security captures the request; the employee approves; an OTP is mailed to the desk; the guard admits.</li>
+    <li><strong>Admin sees everything and writes almost nothing on visits.</strong> Adding/removing people is an admin job. Changing a visit’s status is a gate job. Blacklist removal needs a second person (CEO).</li>
+  </ul>
+  <p>The deployment model is <strong>on-premise</strong>: Postgres, Auth, files and the app process all run on a machine the mall owns. The Windows .exe on a guard PC is a thin client. The phone PWA is the same app, installed on the home screen, used by employees to request a visitor without walking to a desktop.</p>
+
+  <h2>2. End-to-end user flow</h2>
+  <svg class="flow" viewBox="0 0 1000 200" xmlns="http://www.w3.org/2000/svg">
+    <g font-size="13" font-family="Segoe UI,sans-serif" text-anchor="middle">
+      <rect x="10" y="50" width="150" height="70" rx="10" fill="#f7f1e6" stroke="#C6A15B"/>
+      <text x="85" y="80">Employee</text><text x="85" y="100">pre-registers</text>
+      <rect x="180" y="50" width="150" height="70" rx="10" fill="#f7f1e6" stroke="#C6A15B"/>
+      <text x="255" y="80">OTP email</text><text x="255" y="100">+ SMS log</text>
+      <rect x="350" y="50" width="150" height="70" rx="10" fill="#f7f1e6" stroke="#C6A15B"/>
+      <text x="425" y="80">Guard finds</text><text x="425" y="100">OTP at desk</text>
+      <rect x="520" y="50" width="150" height="70" rx="10" fill="#f7f1e6" stroke="#C6A15B"/>
+      <text x="595" y="80">ID + photo</text><text x="595" y="100">+ badge #</text>
+      <rect x="690" y="50" width="150" height="70" rx="10" fill="#f7f1e6" stroke="#C6A15B"/>
+      <text x="765" y="80">Checked in</text><text x="765" y="100">visitor enters</text>
+      <rect x="860" y="50" width="130" height="70" rx="10" fill="#f7f1e6" stroke="#C6A15B"/>
+      <text x="925" y="80">Badge back</text><text x="925" y="100">checked out</text>
+    </g>
+  </svg>
+  <ol>
+    <li><strong>Pre-register.</strong> Employee (staff) signs in, opens Pre-Register a Visitor, enters name / mobile / email / expected slot. The server returns a 6-digit OTP and a <code>VIS-YYYYMMDD-NNNN</code>.</li>
+    <li><strong>Visitor is coming.</strong> They receive the OTP by email (and an SMS row is written for the GSM gateway). They need no account.</li>
+    <li><strong>Formalities at security.</strong> Guard opens Scan Pass, types the OTP, sees host, department, purpose, phone.</li>
+    <li><strong>Badge issued.</strong> Guard scans (or types) the ID, captures a photograph, types the physical card number (e.g. <code>B-218</code>), presses Check In.</li>
+    <li><strong>Visitor entering.</strong> Status becomes <code>checked_in</code>. The host is notified in-app. The person is on Entry &amp; Exit → Checked In and on any fire-marshal list.</li>
+    <li><strong>Time of return.</strong> Guard types the returned badge number. The confirm dialog names that number; the tick is mandatory. Check-out frees the badge.</li>
+  </ol>
+
+  <p>Recorded on this local host. First pass: Rahul Menon, OTP <code>661871</code>, badge <code>B-218</code>, ref <code>VIS-20260818-0010</code>. Repeated live: Ananya Rao, OTP <code>454178</code>, badge <code>B-219</code>, ref <code>VIS-20260818-0011</code> — both ended <code>checked_out</code> on the local Postgres.</p>
+  <figure>
+    <img class="shot" src="assets/shots/login.jpg" alt="Secure Gate login" />
+    <figcaption>Login — one card for every role. Demo password <code>demo123</code>.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/e2e_1_employee_prereg_otp.jpg" alt="Employee pre-register success with OTP" />
+    <figcaption>1. Employee pre-registers one visitor. The server mints a 6-digit OTP and a visit ref.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/ananya_otp_email.jpg" alt="OTP email in Mailpit for Ananya Rao" />
+    <figcaption>2. Visitor is coming — OTP 454178 emailed on-prem (Mailpit). Same message would go through mall SMTP in production.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/ananya_otp_search.jpg" alt="Guard finds Ananya by OTP" />
+    <figcaption>3. Security types 454178 on Scan Pass. Ananya Rao, Pre-approved, still outside.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/e2e_4_badge_issue.jpg" alt="ID verified, badge number typed, Check In enabled" />
+    <figcaption>4. Formalities (Rahul pass, same desk): ID last-four + photograph + physical badge number. Check In stays disabled until all three exist.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/ananya_checked_in.jpg" alt="Ananya Rao checked in successfully" />
+    <figcaption>5. Visitor entering — Ananya checked in 09:31 IST, badge B-219, host Neha Gupta.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/ananya_entry_exit.jpg" alt="Ananya on Entry and Exit checked in" />
+    <figcaption>Entry &amp; Exit → Checked In. She is on the fire-marshal list until the badge comes back.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/ananya_checked_out.jpg" alt="Ananya Rao checked out after returning badge" />
+    <figcaption>6. Time of return — B-219 collected, Ananya gone from Checked In, card free to reissue.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/admin_visitors_log.jpg" alt="Admin visitors log" />
+    <figcaption>Admin Visitors Log is the paper register’s replacement — the same rows as CSV and print.</figcaption>
+  </figure>
+
+  <h2>3. How Quest Mall benefits</h2>
+  <ul>
+    <li><strong>The book is replaced, not copied.</strong> Admin Visitors Log is the register: on screen, CSV, and print. Seventeen columns, IST timestamps, no zone suffix games.</li>
+    <li><strong>Who is inside is a fact, not a guess.</strong> Open visits are never date-bounded, so a contractor from yesterday is still on the list at 00:10.</li>
+    <li><strong>One person, one presence.</strong> A unique index refuses a second <code>checked_in</code> row for the same visitor.</li>
+    <li><strong>Watchlist is not a rumour.</strong> Flagging is one admin. Unflagging is two people. The gate keeps refusing while a request sits with the CEO.</li>
+    <li><strong>Badges stop vanishing.</strong> A number is typed in and typed out. The next visitor can receive the same card immediately.</li>
+    <li><strong>Brand.</strong> Quest gold / navy, mall logo, no vendor chrome on the guard screen.</li>
+    <li><strong>PII stays in the building</strong> — photos in a private bucket, ID numbers stored as last-four only.</li>
+  </ul>
+
+  <h2>4. Additional features that can be incorporated</h2>
+  <table>
+    <tr><th>Feature</th><th>Status today</th><th>What it would take</th></tr>
+    <tr><td>Real SMS via GSM / DLT</td><td>Row written in <code>otp_deliveries</code></td><td>Modem or aggregator + Indian DLT template</td></tr>
+    <tr><td>Lobby kiosk</td><td>Route exists</td><td>A locked-down tablet + kiosk account</td></tr>
+    <tr><td>WhatsApp pass share</td><td>Button (file + wa.me)</td><td>Nothing, unless they want automated Meta sends</td></tr>
+    <tr><td>Which door</td><td>Table exists, unused</td><td>Guard selects the gate at check-in</td></tr>
+    <tr><td>Hindi UI</td><td>Not in this build</td><td>i18n pass over every label</td></tr>
+    <tr><td>NDA / signature pad</td><td>Charter item, not built</td><td>New check-in step + storage</td></tr>
+    <tr><td>Auto day-close</td><td>Sweep exists, not scheduled</td><td>A policy decision — contractors vs forgotten exits</td></tr>
+  </table>
+
+  <h2>5. Cloud hosting vs premises hosting</h2>
+  <table>
+    <tr><th></th><th>Premises (this product)</th><th>Cloud</th></tr>
+    <tr><td>Where rows live</td><td>Postgres volume on the mall server</td><td>A vendor region</td></tr>
+    <tr><td>Internet cut</td><td>LAN still checks people in</td><td>Gate is blind</td></tr>
+    <tr><td>Compliance story</td><td>“It does not leave this building”</td><td>DPA, subprocessors, region pin</td></tr>
+    <tr><td>Ops</td><td>Mall IT: Docker, backups, SMTP</td><td>Vendor patches; you still own accounts</td></tr>
+    <tr><td>Cost shape</td><td>Hardware + once-off + care</td><td>Monthly, grows with photos</td></tr>
+    <tr><td>Risk</td><td>That one box must be backed up and UPS’d</td><td>Third party outage; data gravity abroad</td></tr>
+  </table>
+  <p>We chose premises because the customer’s explicit constraint was that visitor data must not go outside. The same codebase can point at a hosted Supabase later if they change that constraint — it is an env file, not a rewrite.</p>
+
+  <h2>6. How the database is installed inside the premises</h2>
+  <ol>
+    <li>Install <strong>Docker Desktop</strong> (Windows server) or Docker Engine (Linux).</li>
+    <li>Copy this repository onto that machine. Node 20+ is required.</li>
+    <li>From the repo: <code>npx supabase start</code>. That boots Postgres (port 54322), Auth, PostgREST, Realtime, Storage, and Mailpit. Migrations apply on first boot. All of it is containers on that host.</li>
+    <li>Put the printed keys from <code>npx supabase status</code> into <code>.env</code> (<code>VITE_SUPABASE_URL=http://127.0.0.1:54321</code> plus the local anon and service-role JWTs). Those keys never leave the machine.</li>
+    <li><code>npm run seed</code> creates departments and the first users (change passwords before a real day).</li>
+    <li>Serve the app: <code>npm run dev</code> for demo, or <code>npm run build</code> then <code>npx vite preview --host 0.0.0.0 --port 5173</code> for a shift. Windows: <code>installer/windows/Start-Server.bat</code>.</li>
+    <li>Guards double-click <strong>Secure Gate</strong>. The splash shows a <strong>green light</strong> when the app and Auth health check both succeed, then the login page.</li>
+    <li>Employees on phones open the same URL, use the browser’s <em>Add to Home Screen</em> — that is the PWA. They can pre-register a visitor from the floor.</li>
+  </ol>
+  <p class="note">Nothing in that list is a SaaS signup. Postgres data is a Docker volume on that PC. Back it up like any other database: snapshot the volume nightly to a second disk the mall already owns.</p>
+  <p>Helper: <code>scripts/onprem-up.sh</code> (Linux) · <code>installer/windows/install.ps1</code> (Windows).</p>
+
+  <h2>7. Desktop .exe and mobile PWA</h2>
+  <h3>Windows</h3>
+  <p><code>desktop/</code> is an Electron shell. It does not ship the database. It pings the on-prem server and refuses to open login until both the web app and Auth answer — that is the green light.</p>
+  <pre><code>cd desktop
+npm install
+npm run pack:win</code></pre>
+  <p>That yields <code>SecureGate-Portable.exe</code> (double-click, no install). It is a thin client: the guard still needs the server running (<code>Start-Server.bat</code>). Compile <code>installer/windows/SecureGate.iss</code> in Inno Setup for a Start Menu installer that also drops “Start Secure Gate server”.</p>
+  <p>The portable .exe is a PE32 NSIS self-extractor. Do not commit the 67&nbsp;MB binary to git; build it on the delivery laptop and copy it onto the guard PCs.</p>
+  <figure>
+    <img class="shot" src="assets/shots/desktop_green_light.jpg" alt="Desktop app green connection light" />
+    <figcaption>Windows / desktop shell: green light means the web app and local Auth are both answering. Nothing is sent to the cloud.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/desktop_login.jpg" alt="Login page after Open Secure Gate" />
+    <figcaption>Open Secure Gate loads the same login the browser uses — then the guard or employee signs in.</figcaption>
+  </figure>
+  <h3>Mobile PWA</h3>
+  <p>Production builds register <code>/sw.js</code> and advertise <code>/manifest.webmanifest</code>. On HTTPS (or localhost) Chrome/Edge/Safari offer “Install app”. Staff land on Visitors and can pre-register. Guards should still use a desktop/tablet for the camera and badge typing — the phone is the employee request surface.</p>
+  <p>PWA install on a raw HTTP LAN IP is blocked by browsers. For phones on the mall LAN, put a reverse proxy with a local certificate (Caddy + internal CA, or mkcert) in front of port 5173. That is a go-live question, not a code change.</p>
+
+  <h2>8. Questions to make every function live on day one</h2>
+  <ol>
+    <li>Where is the server physically (UPS, lock, whose key)?</li>
+    <li>LAN plan: DHCP or static for the server; can HOD phones reach it?</li>
+    <li>SMTP relay, From: address, and whether OTPs may leave the building as email.</li>
+    <li>SMS: skip, log-only, or a named GSM/DLT vendor with a template ID?</li>
+    <li>Named Admin, HODs, guards, CEO — emails and departments.</li>
+    <li>Photo retention days (default 365) and who signs that policy.</li>
+    <li>Badge stock: numbered plastic cards, and the numbering scheme (we accept <code>A-Za-z0-9-</code> up to 20 chars).</li>
+    <li>Printer: none / A6 slip / thermal. The product already prints a pass; plastic cards are typed, not printed.</li>
+    <li>Backup target and restore drill date.</li>
+    <li>Who is allowed to run <code>npx supabase db reset</code> (it wipes visits).</li>
+  </ol>
+
+  <h2>9. Demo credentials (local host only)</h2>
+  <p>Password <code>demo123</code> for <code>admin@demo.vms</code>, <code>staff.it@demo.vms</code>, <code>guard@demo.vms</code>, <code>hod.it@demo.vms</code>. App <code>http://localhost:5173</code>. OTP mailbox <code>http://127.0.0.1:54324</code>.</p>
+  <p>Change every password before a real visitor walks in. The seed is a show, not a production identity store.</p>
+
+  <h2>10. Honest limits</h2>
+  <ul>
+    <li>Check-in needs a photograph. A laptop without a webcam uses <em>upload from device</em> (already in the UI). If OCR cannot read the ID, the guard types document type, last four, and the printed name.</li>
+    <li>SMS is not a live modem in this box. Email is live against the on-prem relay.</li>
+    <li>The Windows .exe is a client. The database is Docker on the server. One PC can be both if Docker Desktop is installed on it.</li>
+  </ul>
+
+  <h2>11. Training — who clicks what</h2>
+  <table>
+    <tr><th>Person</th><th>Open</th><th>Do this</th></tr>
+    <tr><td>Employee</td><td>Desktop app or phone PWA → login staff</td><td>Visitors → Pre-Register a Visitor. Read the OTP to the guest (or they read the email).</td></tr>
+    <tr><td>Visitor</td><td>Nothing to install</td><td>Arrive. Quote the six digits. Hand over ID. Wear the badge. Return it on the way out.</td></tr>
+    <tr><td>Guard</td><td>Secure Gate .exe (green light) → login guard</td><td>Scan Pass → type OTP → ID + photo → badge number → Check In. At exit: Entry &amp; Exit → Return a badge → tick → confirm.</td></tr>
+    <tr><td>HOD</td><td>Same app, hod login</td><td>Walk-in requests on the dashboard. Approve or decline with a reason.</td></tr>
+    <tr><td>Admin</td><td>admin login</td><td>Settings → Roles &amp; Users to add people. Visitors Log / Reports for the book. Never check anyone in.</td></tr>
+  </table>
+  <p>Play the journey video once with the customer, then let a guard repeat it on a demo laptop with <code>staff.it@demo.vms</code> / <code>guard@demo.vms</code>.</p>
+
+  <h2>12. Server installation (short)</h2>
+  <p>The full instruction set is <code>docs/customer/SERVER-INSTALL.md</code>. First boot on the mall PC:</p>
+  <pre><code>npm install
+npx supabase start
+node scripts/write-local-env.mjs
+npx supabase migration up --local
+npm run seed
+npm run dev -- --host 0.0.0.0 --port 5173</code></pre>
+  <p>Windows: <code>installer\windows\Start-Server.bat</code>. Then the green-light <code>.exe</code> on each guard PC. Migrations through <strong>096</strong> (private photo bucket) must be applied; <code>migration up --local</code> is the command if you pull new SQL later.</p>
+</main>
+</body>
+</html>

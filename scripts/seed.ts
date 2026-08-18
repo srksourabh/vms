@@ -113,6 +113,9 @@ async function seed() {
     { key: 'staff_hr',     email: 'staff.hr@demo.vms',    name: 'Pooja Sharma'   },
     { key: 'hod2_fin',     email: 'hod2.fin@demo.vms',    name: 'Arun Kumar'     },
     { key: 'staff_fin',    email: 'staff.fin@demo.vms',   name: 'Divya Singh'    },
+    { key: 'dummy_admin',  email: 'dummy.admin@demo.vms', name: 'Dummy Admin'    },
+    { key: 'dummy_emp',    email: 'dummy.emp@demo.vms',   name: 'Dummy Employee' },
+    { key: 'dummy_guard',  email: 'dummy.guard@demo.vms', name: 'Dummy Guard'    },
   ];
 
   for (const s of specs) {
@@ -141,6 +144,9 @@ async function seed() {
     { id: users['staff_hr']!.id,    role: 'staff'       as const, department_id: dept['HR']?.id ?? null  },
     { id: users['hod2_fin']!.id,    role: 'hod'         as const, department_id: dept['FIN']?.id ?? null },
     { id: users['staff_fin']!.id,   role: 'staff'       as const, department_id: dept['FIN']?.id ?? null },
+    { id: users['dummy_admin']!.id, role: 'admin'       as const, department_id: null               },
+    { id: users['dummy_emp']!.id,   role: 'staff'       as const, department_id: dept['IT']?.id ?? null  },
+    { id: users['dummy_guard']!.id, role: 'guard'       as const, department_id: null               },
   ];
 
   for (const up of profileUpdates) {
@@ -158,10 +164,10 @@ async function seed() {
   // ── 4. Visitors ──
   console.log('\n── Visitors');
   const visitorRows = [
-    { phone: '9876543210', full_name: 'Rohan Desai',      company: 'TechSoft Pvt Ltd',  id_type: 'Aadhar', id_last4: '4321', is_blacklisted: false },
-    { phone: '9123456789', full_name: 'Kavita Joshi',     company: 'VendorCo',           id_type: 'PAN',    id_last4: '6789', is_blacklisted: false },
-    { phone: '9988776655', full_name: 'Mohan Das',        company: null,                 id_type: 'DL',     id_last4: '9900', is_blacklisted: false },
-    { phone: '9000000001', full_name: 'Blacklisted User', company: null,                 id_type: null,     id_last4: null,   is_blacklisted: true, blacklist_reason: 'Theft incident on 2025-01-10' },
+    { phone: '9876543210', full_name: 'Rohan Desai',      vendor_name: 'TechSoft Pvt Ltd',  id_type: 'Aadhar', id_last4: '4321', is_blacklisted: false },
+    { phone: '9123456789', full_name: 'Kavita Joshi',     vendor_name: 'VendorCo',           id_type: 'PAN',    id_last4: '6789', is_blacklisted: false },
+    { phone: '9988776655', full_name: 'Mohan Das',        vendor_name: null,                 id_type: 'DL',     id_last4: '9900', is_blacklisted: false },
+    { phone: '9000000001', full_name: 'Blacklisted User', vendor_name: null,                 id_type: null,     id_last4: null,   is_blacklisted: true, blacklist_reason: 'Theft incident on 2025-01-10' },
   ];
   const { data: visitors, error: visErr } = await admin
     .from('visitors')
@@ -255,6 +261,24 @@ async function seed() {
     console.log(`  ✓ visit ${data.ref_number}`);
   }
 
+  // ── 6. Pre-registered visitors with OTP (same RPC the employee UI calls) ──
+  console.log('\n── Pre-registered visitors (OTP ready for the gate)');
+  const itDept = dept['IT']?.id;
+  const preRegs = [
+    { phone: '9700000011', name: 'Anita Rao',   vendor: 'Globex',  email: 'anita.demo@example.com' },
+    { phone: '9700000012', name: 'Sameer Khan', vendor: 'Initech', email: 'sameer.demo@example.com' },
+  ];
+  for (const p of preRegs) {
+    const { data, error } = await admin.rpc('pre_approve_visitor_v2', {
+      p_phone: p.phone, p_full_name: p.name, p_vendor_name: p.vendor,
+      p_department_id: itDept, p_host_id: users['staff_it']!.id, p_purpose: 'meeting',
+      p_scheduled_for: new Date(Date.now() + 60 * 60_000).toISOString(), p_email: p.email,
+    });
+    if (error) { console.error(`  ✗ pre-reg ${p.name}: ${error.message}`); continue; }
+    const res = data as { otp_code: string; ref_number: string };
+    console.log(`  ✓ ${p.name.padEnd(16)} OTP ${res.otp_code}  (${res.ref_number})`);
+  }
+
   // ── Done ──
   console.log('\n════════════════════════════════');
   console.log('✅  Seed complete.\n');
@@ -264,7 +288,9 @@ async function seed() {
   console.log(`  HOD (HR):      hod.hr@demo.vms, hod2.hr@demo.vms`);
   console.log(`  HOD (FIN):     hod.fin@demo.vms, hod2.fin@demo.vms`);
   console.log(`  Admin:         admin@demo.vms`);
-  console.log('\nOpen the app, log in as guard, and follow DEMO-SCRIPT.md');
+  console.log(`  Staff:         staff.it@demo.vms (an employee who pre-registers visitors)`);
+  console.log(`  Dummy set:     dummy.admin@demo.vms · dummy.emp@demo.vms · dummy.guard@demo.vms`);
+  console.log('\nGate demo: log in as the guard, open Scan Pass, and enter one of the OTPs printed above.');
   console.log('════════════════════════════════\n');
 }
 

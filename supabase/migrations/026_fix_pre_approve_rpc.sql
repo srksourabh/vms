@@ -65,12 +65,14 @@ revoke execute on function public.pre_approve_visitor(text, text, text, text, uu
 
 -- Step 3 — Expand visitors INSERT policy to include HOD
 drop policy if exists "visitors: guard/admin can insert" on public.visitors;
+drop policy if exists "visitors: guard/hod/admin can insert" on public.visitors;
 create policy "visitors: guard/hod/admin can insert"
   on public.visitors for insert to authenticated
   with check (public.current_user_role() in ('guard', 'hod', 'admin', 'super_admin'));
 
 -- Step 4 — Expand visits INSERT policy to include HOD
 drop policy if exists "visits: guard/admin can insert" on public.visits;
+drop policy if exists "visits: guard/hod/admin can insert" on public.visits;
 create policy "visits: guard/hod/admin can insert"
   on public.visits for insert to authenticated
   with check (public.current_user_role() in ('guard', 'hod', 'admin', 'super_admin'));

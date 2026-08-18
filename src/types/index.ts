@@ -114,6 +114,10 @@ export type Visit = {
   checkin_duration_seconds?: number | null;
   qr_token: string;
   qr_expires_at: string | null;
+  // Short numeric code (migration 094) the visitor gives to security at the
+  // gate. Minted for every visit at insert; dispatched by email/SMS on
+  // pre-registration, or to the security desk when a walk-in is approved.
+  otp_code?: string | null;
   created_at: string;
   // joined fields (populated by views/RPCs)
   visitor?: Visitor;

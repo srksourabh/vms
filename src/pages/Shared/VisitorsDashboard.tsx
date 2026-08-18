@@ -4,6 +4,7 @@ import { attachHostNames } from '../../lib/hostNames';
 import { formatTime } from '../../lib/formatDate';
 import { STATUS_STYLES } from '../../lib/statusStyles';
 import { istDayStart } from '../../lib/visitExpiry';
+import PreApproveForm from '../HOD/PreApproveForm';
 import type { Visit } from '../../types/index';
 
 type VisitRow = Visit & { host?: { id: string; full_name: string } };
@@ -11,6 +12,7 @@ type VisitRow = Visit & { host?: { id: string; full_name: string } };
 export default function VisitorsDashboard(): React.ReactElement {
   const [visits, setVisits] = useState<VisitRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showPreReg, setShowPreReg] = useState(false);
 
   // IST midnight. This was the UTC date key passed as a bare `2026-08-17`,
   // which Postgres casts to 00:00 UTC — 05:30 IST — so the staff view of
@@ -66,11 +68,26 @@ export default function VisitorsDashboard(): React.ReactElement {
   return (
     <div className="space-y-6">
       {/* Page heading */}
-      <div className="revamp-greeting">
-        <p className="revamp-greeting-eyebrow">Gate Operations</p>
-        <h1 className="text-xl font-bold text-navy-900 dark:text-white">Visitors</h1>
-        <p className="text-sm text-navy-500 dark:text-navy-400 mt-0.5">Today's activity overview</p>
+      <div className="revamp-greeting flex items-start justify-between gap-4">
+        <div>
+          <p className="revamp-greeting-eyebrow">Gate Operations</p>
+          <h1 className="text-xl font-bold text-navy-900 dark:text-white">Visitors</h1>
+          <p className="text-sm text-navy-500 dark:text-navy-400 mt-0.5">Pre-register your visitors and track today's activity</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowPreReg((s) => !s)}
+          className={showPreReg ? 'btn-secondary shrink-0' : 'btn-primary shrink-0'}
+        >
+          {showPreReg ? 'Close' : '+ Pre-Register a Visitor'}
+        </button>
       </div>
+
+      {showPreReg && (
+        <PreApproveForm
+          onPreApproved={() => { setShowPreReg(false); void fetchVisits(); }}
+        />
+      )}
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

@@ -92,5 +92,13 @@ grant execute on function public.flag_overstays to authenticated;
 
 -- ── 9. RLS on settings ──────────────────────────────────────────────────────
 alter table public.settings enable row level security;
+drop policy if exists "settings_read_authenticated" on public.settings;
+drop policy if exists "settings_write_admin" on public.settings;
+drop policy if exists "settings_insert_admin" on public.settings;
+drop policy if exists "settings_update_admin" on public.settings;
+drop policy if exists "settings_read_authenticated" on public.settings;
 create policy "settings_read_authenticated" on public.settings for select to authenticated using (true);
-create policy "settings_write_admin" on public.settings for insert, update to authenticated using (auth.jwt() -> 'app_metadata' ->> 'role' in ('admin', 'super_admin'));
+drop policy if exists "settings_insert_admin" on public.settings;
+create policy "settings_insert_admin" on public.settings for insert to authenticated with check (auth.jwt() -> 'app_metadata' ->> 'role' in ('admin', 'super_admin'));
+drop policy if exists "settings_update_admin" on public.settings;
+create policy "settings_update_admin" on public.settings for update to authenticated using (auth.jwt() -> 'app_metadata' ->> 'role' in ('admin', 'super_admin')) with check (auth.jwt() -> 'app_metadata' ->> 'role' in ('admin', 'super_admin'));

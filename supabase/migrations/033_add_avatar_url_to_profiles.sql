@@ -7,6 +7,7 @@ values ('avatars', 'avatars', true)
 on conflict (id) do nothing;
 
 -- Anyone authenticated can upload their own avatar (path = user_id/*)
+drop policy if exists "avatars: users can upload own avatar" on storage.objects;
 create policy "avatars: users can upload own avatar"
   on storage.objects for insert to authenticated
   with check (
@@ -15,11 +16,13 @@ create policy "avatars: users can upload own avatar"
   );
 
 -- Anyone can read avatars (public bucket)
+drop policy if exists "avatars: public read" on storage.objects;
 create policy "avatars: public read"
   on storage.objects for select to anon, authenticated
   using (bucket_id = 'avatars');
 
 -- Users can update/delete their own avatar
+drop policy if exists "avatars: users can update own avatar" on storage.objects;
 create policy "avatars: users can update own avatar"
   on storage.objects for update to authenticated
   using (
@@ -27,6 +30,7 @@ create policy "avatars: users can update own avatar"
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
+drop policy if exists "avatars: users can delete own avatar" on storage.objects;
 create policy "avatars: users can delete own avatar"
   on storage.objects for delete to authenticated
   using (

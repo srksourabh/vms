@@ -94,6 +94,7 @@ create trigger check_visitor_blacklist_update
 drop policy if exists "profiles: read scoped by role" on public.profiles;
 drop policy if exists "profiles: all authenticated can read" on public.profiles;
 -- Safe SELECT: direct auth.uid() check, no subquery
+drop policy if exists "profiles: all authenticated can read" on public.profiles;
 create policy "profiles: all authenticated can read"
   on public.profiles for select to authenticated
   using (true);
@@ -120,21 +121,25 @@ drop policy if exists "visits: read scoped by role" on public.visits;
 drop policy if exists "visits: all authenticated can read" on public.visits;
 
 -- 7) Recreate visits policies using JWT only (no subqueries)
+drop policy if exists "visits: all authenticated can read" on public.visits;
 create policy "visits: all authenticated can read"
   on public.visits for select to authenticated
   using (true);
 
+drop policy if exists "visits: guard/admin can insert" on public.visits;
 create policy "visits: guard/admin can insert"
   on public.visits for insert to authenticated
   with check ((auth.jwt() -> 'app_metadata' ->> 'role') in ('guard', 'admin', 'super_admin'));
 
 -- Guard can check-in/check-out (status transitions validated by trigger)
+drop policy if exists "visits: guard updates status" on public.visits;
 create policy "visits: guard updates status"
   on public.visits for update to authenticated
   using ((auth.jwt() -> 'app_metadata' ->> 'role') = 'guard')
   with check ((auth.jwt() -> 'app_metadata' ->> 'role') = 'guard');
 
 -- HOD can update own department visits (status transitions validated by trigger)
+drop policy if exists "visits: hod updates own department" on public.visits;
 create policy "visits: hod updates own department"
   on public.visits for update to authenticated
   using (
@@ -147,6 +152,7 @@ create policy "visits: hod updates own department"
   );
 
 -- Admin/super_admin can update any visit
+drop policy if exists "visits: admin updates any" on public.visits;
 create policy "visits: admin updates any"
   on public.visits for update to authenticated
   using ((auth.jwt() -> 'app_metadata' ->> 'role') in ('admin', 'super_admin'))
@@ -183,10 +189,12 @@ create table if not exists public.audit_logs (
 );
 alter table public.audit_logs enable row level security;
 
+drop policy if exists "audit_logs: admin can read" on public.audit_logs;
 create policy "audit_logs: admin can read"
   on public.audit_logs for select to authenticated
   using ((auth.jwt() -> 'app_metadata' ->> 'role') in ('admin', 'super_admin'));
 
+drop policy if exists "audit_logs: triggers can insert" on public.audit_logs;
 create policy "audit_logs: triggers can insert"
   on public.audit_logs for insert to authenticated
   with check (true);

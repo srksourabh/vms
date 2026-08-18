@@ -45,6 +45,19 @@ async function fetchVisitsByRef(pattern: string): Promise<Visit[]> {
   return (data as unknown as Visit[]) ?? [];
 }
 
+// The OTP a visitor is given at pre-registration (or a walk-in's guard-facing
+// OTP) is the primary way a guard finds a visit at the gate. Matched exactly:
+// a 6-digit code is unique among open visits (migration 094), so an exact hit
+// is unambiguous, where a substring would collide with phone fragments.
+async function fetchVisitsByOtp(code: string): Promise<Visit[]> {
+  const { data, error } = await supabase.from('visits').select(VISIT_SELECT).eq('otp_code', code);
+  if (error) {
+    console.error('[searchVisits] otp_code lookup failed', error);
+    return [];
+  }
+  return (data as unknown as Visit[]) ?? [];
+}
+
 async function fetchVisitorIds(column: 'full_name' | 'phone', pattern: string): Promise<string[]> {
   const { data, error } = await supabase.from('visitors').select('id').ilike(column, pattern);
   if (error) {
@@ -78,9 +91,13 @@ export async function searchAllVisits(query: string, limit?: number): Promise<Vi
   const pattern = `%${escapeIlike(trimmed)}%`;
   const digits = digitsOnly(trimmed);
 
+  // A 4–8 digit query is treated as a possible gate OTP (exact match).
+  const isOtpLike = /^\d{4,8}$/.test(trimmed);
+
   try {
-    const [refVisits, nameIds, phoneIds] = await Promise.all([
+    const [refVisits, otpVisits, nameIds, phoneIds] = await Promise.all([
       fetchVisitsByRef(pattern),
+      isOtpLike ? fetchVisitsByOtp(trimmed) : Promise.resolve<Visit[]>([]),
       fetchVisitorIds('full_name', pattern),
       digits.length >= 2 ? fetchVisitorIds('phone', `%${digits}%`) : Promise.resolve<string[]>([]),
     ]);
@@ -91,7 +108,7 @@ export async function searchAllVisits(query: string, limit?: number): Promise<Vi
     const visitorVisits = await fetchVisitsByVisitorIds(visitorIds);
 
     const merged = new Map<string, Visit>();
-    for (const v of [...refVisits, ...visitorVisits]) merged.set(v.id, v);
+    for (const v of [...refVisits, ...otpVisits, ...visitorVisits]) merged.set(v.id, v);
 
     const rows = [...merged.values()]
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())

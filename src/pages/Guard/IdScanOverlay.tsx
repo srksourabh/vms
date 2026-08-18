@@ -8,6 +8,7 @@ import { safeErrorMessage } from '../../lib/errors';
 import ModalCloseButton from '../../components/ModalCloseButton';
 import { useEscapeKey } from '../../lib/useEscapeKey';
 import { type IdScanResult } from './idScanTypes';
+import ManualIdEntry from './ManualIdEntry';
 
 export type { IdScanResult } from './idScanTypes';
 
@@ -152,6 +153,7 @@ export default function IdScanOverlay({ onScanned, onClose }: Props): React.Reac
         <div className="bg-white rounded-2xl p-6 max-w-sm w-full space-y-4 relative" onClick={(e) => e.stopPropagation()}>
           <ModalCloseButton onClose={close} />
           <p className="text-sm font-semibold text-danger-700 pr-8">{error}</p>
+          <ManualIdEntry onSubmit={(r) => { stopCamera(); onScanned(r); }} />
           <button onClick={retry} className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl py-2.5 text-sm">Retry</button>
         </div>
       </div>

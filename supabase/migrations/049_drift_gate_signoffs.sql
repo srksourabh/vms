@@ -60,6 +60,7 @@ create policy "gate_signoffs: guard can insert"
 -- than 032's `using (true)` which would have leaked every gate movement to
 -- every authenticated user regardless of department.
 drop policy if exists "gate_signoffs: authenticated can read" on public.gate_signoffs;
+drop policy if exists "gate_signoffs: read scoped by role" on public.gate_signoffs;
 create policy "gate_signoffs: read scoped by role"
   on public.gate_signoffs for select to authenticated
   using (

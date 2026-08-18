@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Secure Gate — Visitor Management System</title>
     <link rel="icon" type="image/jpeg" href="/quest-mall-logo.jpg">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#C6A15B">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Secure Gate">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
     <!-- worker-src/child-src must allow blob:. qr-scanner runs its QR decoder in a
          Worker created from a blob: URL; worker scripts fall back to script-src
          when no worker-src is set, and script-src 'self' does not match blob:, so
@@ -18,7 +23,7 @@
          re-enable eval() or new Function(), which plain 'unsafe-eval' would.
          Never widen this to 'unsafe-eval'.
          See tests/security/csp.test.ts. -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; child-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; media-src 'self' blob:; font-src 'self' data:; frame-src 'none'; object-src 'none'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; child-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co http://127.0.0.1:54321 ws://127.0.0.1:54321 http://localhost:54321 ws://localhost:54321; media-src 'self' blob:; font-src 'self' data:; frame-src 'none'; object-src 'none'">
   </head>
   <body>
     <div id="root"></div>

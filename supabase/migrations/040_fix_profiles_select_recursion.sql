@@ -32,6 +32,7 @@ drop policy if exists "profiles: read scoped by role"                  on public
 
 -- 2) One SELECT policy, JWT-only, no subqueries (restores migration 016's intent
 --    and additionally guarantees a user can always see their own row).
+drop policy if exists "profiles: read scoped by role" on public.profiles;
 create policy "profiles: read scoped by role"
   on public.profiles for select to authenticated
   using (

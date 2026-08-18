@@ -15,11 +15,13 @@ drop policy if exists "profiles: read own" on public.profiles;
 
 -- 2) Recreate SELECT policy — wide open read, safe because profiles contain
 --    only non-sensitive data (name, email, department). PII is in visitors table.
+drop policy if exists "profiles: all authenticated can read" on public.profiles;
 create policy "profiles: all authenticated can read"
   on public.profiles for select to authenticated
   using (true);
 
 -- 3) Users can update their own non-sensitive fields (NOT role / department_id / delegate_id)
+drop policy if exists "profiles: user updates own non-sensitive fields" on public.profiles;
 create policy "profiles: user updates own non-sensitive fields"
   on public.profiles for update to authenticated
   using (id = auth.uid())
@@ -31,6 +33,7 @@ create policy "profiles: user updates own non-sensitive fields"
   );
 
 -- 4) Admin manages all fields on any profile
+drop policy if exists "profiles: admin manages all" on public.profiles;
 create policy "profiles: admin manages all"
   on public.profiles for update to authenticated
   using (public.current_user_role() in ('admin', 'super_admin'))

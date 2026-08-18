@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Secure Gate — Quest Mall customer presentation</title>
+  <style>
+    :root { --gold:#C6A15B; --navy:#16161A; --paper:#FBFAF8; --muted:#7C766C; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; background:var(--navy); color:var(--paper); font-family:"Segoe UI",system-ui,sans-serif; }
+    .deck { height:100vh; overflow:hidden; }
+    .slide { display:none; height:100vh; padding:56px 72px; }
+    .slide.on { display:flex; flex-direction:column; }
+    h1 { font-size:42px; font-weight:600; margin:0 0 12px; }
+    h2 { font-size:28px; font-weight:600; margin:0 0 20px; color:var(--gold); }
+    .kicker { letter-spacing:.22em; text-transform:uppercase; font-size:12px; color:var(--gold); margin-bottom:16px; }
+    p, li { font-size:18px; line-height:1.45; color:#E8E4DC; }
+    ul { margin:8px 0 0 18px; }
+    .nav { position:fixed; bottom:20px; right:28px; color:var(--muted); font-size:13px; }
+    table { border-collapse:collapse; width:min(920px,100%); }
+    th, td { text-align:left; padding:10px 12px; border-bottom:1px solid rgba(198,161,91,.25); font-size:16px; }
+    th { color:var(--gold); font-weight:600; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:28px; }
+    .card { background:#1E1D22; border:1px solid rgba(198,161,91,.28); border-radius:16px; padding:20px; }
+    .dot { display:inline-block; width:12px; height:12px; border-radius:50%; background:#22c55e; margin-right:8px; }
+    svg.flow { width:min(1000px,100%); height:auto; }
+    svg.flow-detail { width:100%; flex:1; min-height:0; max-height:calc(100vh - 150px); }
+    .slide.chart { padding:32px 40px 44px; }
+    .slide.chart h2 { font-size:22px; margin-bottom:8px; }
+    .legend { display:flex; flex-wrap:wrap; gap:14px 22px; font-size:13px; color:#C6A15B; margin-top:6px; }
+    .legend span b { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:middle; }
+  </style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<section class="slide on">
+  <div class="kicker">Quest Mall · On-premise</div>
+  <h1>Secure Gate</h1>
+  <p>Visitor management that stays inside the building. Employees pre-register. Security checks identity, issues a badge, and takes it back at exit.</p>
+  <p style="margin-top:28px;color:var(--gold)">Customer delivery briefing</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Requirement</div>
+  <h2>What the customer asked for</h2>
+  <ul>
+    <li>One admin panel: add/remove employees and security guards; see every visit, history, daily status, host-wise detail.</li>
+    <li>Employees pre-register a visitor: name, mobile, email, expected date &amp; time.</li>
+    <li>OTP generated and sent by email and SMS. Visitor quotes it at the gate.</li>
+    <li>Security searches the OTP, takes ID proof and photograph, types the badge number, grants entry.</li>
+    <li>On the way out the visitor returns the badge; typing that number checks them out and frees the badge.</li>
+    <li>Walk-in without a booking: security captures details → employee approves → OTP emailed to security.</li>
+    <li>All of it on the customer’s own premises. Data does not leave the site.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Journey</div>
+  <h2>The visitor’s day, in six beats</h2>
+  <svg class="flow" viewBox="0 0 1000 160" xmlns="http://www.w3.org/2000/svg">
+    <defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#C6A15B"/></marker></defs>
+    <g font-size="13" font-family="Segoe UI,sans-serif" text-anchor="middle" fill="#FBFAF8">
+      <rect x="8" y="40" width="140" height="64" rx="12" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="78" y="68">1. Employee</text><text x="78" y="88">pre-registers</text>
+      <rect x="176" y="40" width="140" height="64" rx="12" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="246" y="68">2. Visitor</text><text x="246" y="88">arrives + OTP</text>
+      <rect x="344" y="40" width="140" height="64" rx="12" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="414" y="68">3. ID + photo</text><text x="414" y="88">at the desk</text>
+      <rect x="512" y="40" width="140" height="64" rx="12" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="582" y="68">4. Badge</text><text x="582" y="88">number typed</text>
+      <rect x="680" y="40" width="140" height="64" rx="12" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="750" y="68">5. Enter</text><text x="750" y="88">checked in</text>
+      <rect x="848" y="40" width="140" height="64" rx="12" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="918" y="68">6. Return</text><text x="918" y="88">badge back</text>
+    </g>
+    <g stroke="#C6A15B" stroke-width="2" fill="none" marker-end="url(#a)">
+      <line x1="148" y1="72" x2="172" y2="72"/><line x1="316" y1="72" x2="340" y2="72"/>
+      <line x1="484" y1="72" x2="508" y2="72"/><line x1="652" y1="72" x2="676" y2="72"/>
+      <line x1="820" y1="72" x2="844" y2="72"/>
+    </g>
+  </svg>
+  <p>One predicate, one list, one badge number. The tile count is the length of the list it opens.</p>
+</section>
+
+<section class="slide chart">
+  <div class="kicker">Flowchart · booked visitor</div>
+  <h2>Who does what — pre-register to inside</h2>
+  <svg class="flow-detail" viewBox="0 0 1180 560" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#C6A15B"/></marker>
+      <marker id="arr-red" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#E07A6A"/></marker>
+    </defs>
+    <g font-family="Segoe UI,sans-serif">
+      <text x="20" y="22" fill="#C6A15B" font-size="12" letter-spacing="2">EMPLOYEE</text>
+      <text x="300" y="22" fill="#C6A15B" font-size="12" letter-spacing="2">SYSTEM</text>
+      <text x="620" y="22" fill="#C6A15B" font-size="12" letter-spacing="2">VISITOR</text>
+      <text x="900" y="22" fill="#C6A15B" font-size="12" letter-spacing="2">GUARD</text>
+
+      <rect x="16" y="40" width="170" height="70" rx="10" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="101" y="70" text-anchor="middle" fill="#FBFAF8" font-size="13">Logs in (staff)</text>
+      <text x="101" y="90" text-anchor="middle" fill="#E8E4DC" font-size="12">+ Pre-Register</text>
+
+      <rect x="16" y="150" width="170" height="86" rx="10" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="101" y="176" text-anchor="middle" fill="#FBFAF8" font-size="13">Name · mobile</text>
+      <text x="101" y="196" text-anchor="middle" fill="#FBFAF8" font-size="13">email · date/time</text>
+      <text x="101" y="216" text-anchor="middle" fill="#E8E4DC" font-size="12">OK on the slot</text>
+
+      <polygon points="310,193 380,133 450,193 380,253" fill="#252018" stroke="#C6A15B"/>
+      <text x="380" y="188" text-anchor="middle" fill="#FBFAF8" font-size="12">Blacklisted?</text>
+      <text x="380" y="206" text-anchor="middle" fill="#9aa3af" font-size="11">phone check</text>
+
+      <rect x="310" y="290" width="140" height="56" rx="8" fill="#3a2020" stroke="#E07A6A"/>
+      <text x="380" y="314" text-anchor="middle" fill="#FBFAF8" font-size="12">STOP</text>
+      <text x="380" y="332" text-anchor="middle" fill="#E07A6A" font-size="11">do not book</text>
+
+      <rect x="500" y="150" width="170" height="86" rx="10" fill="#252018" stroke="#C6A15B"/>
+      <text x="585" y="176" text-anchor="middle" fill="#FBFAF8" font-size="13">Mint 6-digit OTP</text>
+      <text x="585" y="196" text-anchor="middle" fill="#FBFAF8" font-size="13">+ VIS-YYYYMMDD</text>
+      <text x="585" y="216" text-anchor="middle" fill="#E8E4DC" font-size="12">status: approved</text>
+
+      <rect x="500" y="280" width="170" height="70" rx="10" fill="#252018" stroke="#C6A15B"/>
+      <text x="585" y="308" text-anchor="middle" fill="#FBFAF8" font-size="13">Email the visitor</text>
+      <text x="585" y="328" text-anchor="middle" fill="#E8E4DC" font-size="12">SMS row logged</text>
+
+      <rect x="720" y="150" width="160" height="86" rx="10" fill="#242428" stroke="#8A8A90"/>
+      <text x="800" y="176" text-anchor="middle" fill="#FBFAF8" font-size="13">Arrives at gate</text>
+      <text x="800" y="196" text-anchor="middle" fill="#FBFAF8" font-size="13">quotes the OTP</text>
+      <text x="800" y="216" text-anchor="middle" fill="#E8E4DC" font-size="12">no app needed</text>
+
+      <rect x="930" y="40" width="230" height="70" rx="10" fill="#1a2420" stroke="#6BAF8A"/>
+      <text x="1045" y="70" text-anchor="middle" fill="#FBFAF8" font-size="13">Scan Pass · type OTP</text>
+      <text x="1045" y="90" text-anchor="middle" fill="#E8E4DC" font-size="12">camera still off</text>
+
+      <rect x="930" y="150" width="140" height="86" rx="10" fill="#1a2420" stroke="#6BAF8A"/>
+      <text x="1000" y="176" text-anchor="middle" fill="#FBFAF8" font-size="13">Show the record</text>
+      <text x="1000" y="196" text-anchor="middle" fill="#E8E4DC" font-size="12">host · dept</text>
+      <text x="1000" y="216" text-anchor="middle" fill="#E8E4DC" font-size="12">purpose · phone</text>
+
+      <rect x="16" y="390" width="170" height="70" rx="10" fill="#1a2420" stroke="#6BAF8A"/>
+      <text x="101" y="418" text-anchor="middle" fill="#FBFAF8" font-size="13">Scan ID card</text>
+      <text x="101" y="438" text-anchor="middle" fill="#E8E4DC" font-size="12">or type last-four</text>
+
+      <polygon points="291,425 351,375 411,425 351,475" fill="#1a2420" stroke="#6BAF8A"/>
+      <text x="351" y="422" text-anchor="middle" fill="#FBFAF8" font-size="12">Name</text>
+      <text x="351" y="438" text-anchor="middle" fill="#FBFAF8" font-size="12">matches?</text>
+
+      <rect x="291" y="500" width="120" height="44" rx="8" fill="#3a2020" stroke="#E07A6A"/>
+      <text x="351" y="527" text-anchor="middle" fill="#E07A6A" font-size="12">Refuse — mismatch</text>
+
+      <rect x="460" y="390" width="170" height="70" rx="10" fill="#1a2420" stroke="#6BAF8A"/>
+      <text x="545" y="418" text-anchor="middle" fill="#FBFAF8" font-size="13">Photo + badge #</text>
+      <text x="545" y="438" text-anchor="middle" fill="#E8E4DC" font-size="12">e.g. B-219</text>
+
+      <polygon points="740,425 800,375 860,425 800,475" fill="#1a2420" stroke="#6BAF8A"/>
+      <text x="800" y="422" text-anchor="middle" fill="#FBFAF8" font-size="12">All three</text>
+      <text x="800" y="438" text-anchor="middle" fill="#FBFAF8" font-size="12">present?</text>
+
+      <rect x="900" y="390" width="250" height="70" rx="10" fill="#1a2420" stroke="#6BAF8A"/>
+      <text x="1025" y="418" text-anchor="middle" fill="#FBFAF8" font-size="13">Check In → checked_in</text>
+      <text x="1025" y="438" text-anchor="middle" fill="#E8E4DC" font-size="12">host notified · fire-marshal list</text>
+
+      <rect x="900" y="490" width="250" height="50" rx="10" fill="#242428" stroke="#8A8A90"/>
+      <text x="1025" y="520" text-anchor="middle" fill="#FBFAF8" font-size="13">Visitor enters wearing the badge</text>
+
+      <g stroke="#C6A15B" stroke-width="1.6" fill="none" marker-end="url(#arr)">
+        <line x1="101" y1="110" x2="101" y2="150"/>
+        <line x1="186" y1="193" x2="310" y2="193"/>
+        <line x1="450" y1="193" x2="500" y2="193"/>
+        <line x1="585" y1="236" x2="585" y2="280"/>
+        <line x1="670" y1="193" x2="720" y2="193"/>
+        <line x1="880" y1="193" x2="930" y2="193"/>
+        <line x1="1045" y1="110" x2="1000" y2="150"/>
+        <polyline points="1000,236 1000,360 101,360 101,390"/>
+        <line x1="186" y1="425" x2="291" y2="425"/>
+        <line x1="411" y1="425" x2="460" y2="425"/>
+        <line x1="630" y1="425" x2="740" y2="425"/>
+        <line x1="860" y1="425" x2="900" y2="425"/>
+        <line x1="1025" y1="460" x2="1025" y2="490"/>
+      </g>
+      <g stroke="#E07A6A" stroke-width="1.6" fill="none" marker-end="url(#arr-red)">
+        <line x1="380" y1="253" x2="380" y2="290"/>
+        <line x1="351" y1="475" x2="351" y2="500"/>
+      </g>
+      <text x="268" y="184" fill="#9aa3af" font-size="11">submit</text>
+      <text x="458" y="184" fill="#6BAF8A" font-size="11">no</text>
+      <text x="392" y="274" fill="#E07A6A" font-size="11">yes</text>
+      <text x="418" y="414" fill="#6BAF8A" font-size="11">yes</text>
+      <text x="870" y="414" fill="#6BAF8A" font-size="11">yes</text>
+    </g>
+  </svg>
+  <div class="legend">
+    <span><b style="background:#C6A15B"></b>Employee</span>
+    <span><b style="background:#8A7A50"></b>System (OTP + DB)</span>
+    <span><b style="background:#6BAF8A"></b>Guard</span>
+    <span><b style="background:#8A8A90"></b>Visitor</span>
+    <span><b style="background:#E07A6A"></b>Stop</span>
+  </div>
+</section>
+
+<section class="slide chart">
+  <div class="kicker">Flowchart · walk-in and exit</div>
+  <h2>No booking, HOD clearance, then the same badge in/out</h2>
+  <svg class="flow-detail" viewBox="0 0 1180 540" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#C6A15B"/></marker>
+      <marker id="arr2r" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#E07A6A"/></marker>
+    </defs>
+    <g font-family="Segoe UI,sans-serif">
+      <text x="20" y="22" fill="#C6A15B" font-size="12" letter-spacing="2">WALK-IN  (OTP NOT FOUND)</text>
+      <text x="20" y="300" fill="#C6A15B" font-size="12" letter-spacing="2">EXIT  (SAME FOR BOOKED AND WALK-IN)</text>
+
+      <rect x="16" y="40" width="190" height="78" rx="10" fill="#1a2420" stroke="#6BAF8A"/>
+      <text x="111" y="70" text-anchor="middle" fill="#FBFAF8" font-size="13">Register Walk-in</text>
+      <text x="111" y="90" text-anchor="middle" fill="#E8E4DC" font-size="12">ID scan + photo required</text>
+
+      <rect x="240" y="40" width="190" height="78" rx="10" fill="#252018" stroke="#C6A15B"/>
+      <text x="335" y="70" text-anchor="middle" fill="#FBFAF8" font-size="13">pending_approval</text>
+      <text x="335" y="90" text-anchor="middle" fill="#E8E4DC" font-size="12">awaiting host / HOD</text>
+
+      <rect x="464" y="40" width="190" height="78" rx="10" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="559" y="70" text-anchor="middle" fill="#FBFAF8" font-size="13">HOD opens Overview</text>
+      <text x="559" y="90" text-anchor="middle" fill="#E8E4DC" font-size="12">full detail card</text>
+
+      <polygon points="764,79 834,24 904,79 834,134" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="834" y="76" text-anchor="middle" fill="#FBFAF8" font-size="12">Approve?</text>
+      <text x="834" y="94" text-anchor="middle" fill="#9aa3af" font-size="11">reason if no</text>
+
+      <rect x="760" y="170" width="148" height="50" rx="8" fill="#3a2020" stroke="#E07A6A"/>
+      <text x="834" y="200" text-anchor="middle" fill="#E07A6A" font-size="12">Declined · register</text>
+
+      <rect x="950" y="40" width="210" height="78" rx="10" fill="#252018" stroke="#C6A15B"/>
+      <text x="1055" y="68" text-anchor="middle" fill="#FBFAF8" font-size="13">walkin_approved</text>
+      <text x="1055" y="88" text-anchor="middle" fill="#E8E4DC" font-size="12">OTP emailed to security</text>
+
+      <rect x="950" y="150" width="210" height="70" rx="10" fill="#1a2420" stroke="#6BAF8A"/>
+      <text x="1055" y="178" text-anchor="middle" fill="#FBFAF8" font-size="13">Guard: same gate steps</text>
+      <text x="1055" y="198" text-anchor="middle" fill="#E8E4DC" font-size="12">photo + badge → Check In</text>
+
+      <rect x="16" y="330" width="210" height="78" rx="10" fill="#242428" stroke="#8A8A90"/>
+      <text x="121" y="360" text-anchor="middle" fill="#FBFAF8" font-size="13">Visitor at exit</text>
+      <text x="121" y="380" text-anchor="middle" fill="#E8E4DC" font-size="12">hands the badge back</text>
+
+      <rect x="260" y="330" width="210" height="78" rx="10" fill="#1a2420" stroke="#6BAF8A"/>
+      <text x="365" y="360" text-anchor="middle" fill="#FBFAF8" font-size="13">Entry &amp; Exit</text>
+      <text x="365" y="380" text-anchor="middle" fill="#E8E4DC" font-size="12">Return a badge · type number</text>
+
+      <polygon points="590,369 660,314 730,369 660,424" fill="#1a2420" stroke="#6BAF8A"/>
+      <text x="660" y="366" text-anchor="middle" fill="#FBFAF8" font-size="12">On site</text>
+      <text x="660" y="384" text-anchor="middle" fill="#FBFAF8" font-size="12">with that #?</text>
+
+      <rect x="590" y="460" width="140" height="44" rx="8" fill="#3a2020" stroke="#E07A6A"/>
+      <text x="660" y="487" text-anchor="middle" fill="#E07A6A" font-size="12">No match — stop</text>
+
+      <rect x="780" y="330" width="180" height="78" rx="10" fill="#1a2420" stroke="#6BAF8A"/>
+      <text x="870" y="360" text-anchor="middle" fill="#FBFAF8" font-size="13">Tick “collected”</text>
+      <text x="870" y="380" text-anchor="middle" fill="#E8E4DC" font-size="12">mandatory, card or none</text>
+
+      <rect x="990" y="330" width="170" height="78" rx="10" fill="#252018" stroke="#C6A15B"/>
+      <text x="1075" y="360" text-anchor="middle" fill="#FBFAF8" font-size="13">checked_out</text>
+      <text x="1075" y="380" text-anchor="middle" fill="#E8E4DC" font-size="12">badge free to reissue</text>
+
+      <g stroke="#C6A15B" stroke-width="1.6" fill="none" marker-end="url(#arr2)">
+        <line x1="206" y1="79" x2="240" y2="79"/>
+        <line x1="430" y1="79" x2="464" y2="79"/>
+        <line x1="654" y1="79" x2="764" y2="79"/>
+        <line x1="904" y1="79" x2="950" y2="79"/>
+        <line x1="1055" y1="118" x2="1055" y2="150"/>
+        <line x1="226" y1="369" x2="260" y2="369"/>
+        <line x1="470" y1="369" x2="590" y2="369"/>
+        <line x1="730" y1="369" x2="780" y2="369"/>
+        <line x1="960" y1="369" x2="990" y2="369"/>
+      </g>
+      <g stroke="#E07A6A" stroke-width="1.6" fill="none" marker-end="url(#arr2r)">
+        <line x1="834" y1="134" x2="834" y2="170"/>
+        <line x1="660" y1="424" x2="660" y2="460"/>
+      </g>
+      <text x="910" y="70" fill="#6BAF8A" font-size="11">yes</text>
+      <text x="846" y="158" fill="#E07A6A" font-size="11">no</text>
+      <text x="738" y="358" fill="#6BAF8A" font-size="11">yes</text>
+    </g>
+  </svg>
+  <div class="legend">
+    <span>Walk-in never skips the host. Approver clears; the guard still admits (photo + badge).</span>
+    <span>Exit is one control: type the returned number. The tick is required.</span>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Beat 1 · Employee</div>
+  <h2>Pre-register one visitor</h2>
+  <img src="assets/shots/e2e_1_employee_prereg_otp.jpg" alt="OTP minted" style="width:min(920px,100%);border-radius:12px;border:1px solid rgba(198,161,91,.28)" />
+  <p>staff.it@demo.vms → Visitors → Pre-Register. Name, mobile, email, slot, OK. Server returns a 6-digit OTP and VIS- ref.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Beat 2 · Visitor is coming</div>
+  <h2>OTP stays on the premises</h2>
+  <img src="assets/shots/ananya_otp_email.jpg" alt="Mailpit OTP" style="width:min(920px,100%);border-radius:12px;border:1px solid rgba(198,161,91,.28)" />
+  <p>Ananya Rao, OTP 454178, VIS-20260818-0011. Mailpit is the demo mailbox. Production uses mall SMTP. SMS is logged for a GSM gateway.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Beat 3 · Security desk</div>
+  <h2>Guard finds the visitor by OTP</h2>
+  <img src="assets/shots/ananya_otp_search.jpg" alt="OTP search" style="width:min(920px,100%);border-radius:12px;border:1px solid rgba(198,161,91,.28)" />
+  <p>Scan Pass → type six digits → record first, camera second. Host, department, purpose, phone are already on the card.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Beat 4 · Formalities</div>
+  <h2>ID, photograph, badge number</h2>
+  <img src="assets/shots/e2e_4_badge_issue.jpg" alt="Badge typed" style="width:min(920px,100%);border-radius:12px;border:1px solid rgba(198,161,91,.28)" />
+  <p>ID last-four + photo + physical card (e.g. B-218 / B-219). Check In stays disabled until all three exist. If OCR fails: Enter details from the card.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Beat 5 · Entering</div>
+  <h2>Checked in — on the fire-marshal list</h2>
+  <img src="assets/shots/ananya_checked_in.jpg" alt="Checked in" style="width:min(920px,100%);border-radius:12px;border:1px solid rgba(198,161,91,.28)" />
+  <p>Ananya checked in 09:31 IST, badge B-219, host Neha Gupta. Entry &amp; Exit shows her under Checked In until the card comes back.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Beat 6 · Time of return</div>
+  <h2>Type the badge — visit closes</h2>
+  <img src="assets/shots/ananya_checked_out.jpg" alt="Checked out" style="width:min(920px,100%);border-radius:12px;border:1px solid rgba(198,161,91,.28)" />
+  <p>Return a badge → B-219 → tick collected → check out. She leaves Checked In. The number is free for the next visitor.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Desktop client</div>
+  <h2>Green light means the building’s server is up</h2>
+  <img src="assets/shots/desktop_green_light.jpg" alt="Green light" style="width:min(920px,100%);border-radius:12px;border:1px solid rgba(198,161,91,.28)" />
+  <p>SecureGate-Portable.exe pings the web app and Auth. Green → Open Secure Gate → login. The .exe is not the database.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Install</div>
+  <h2>Server — first boot</h2>
+  <p>Docker + Node 20 on one PC. Then:</p>
+  <p><code>npm install</code></p>
+  <p><code>npx supabase start</code></p>
+  <p><code>node scripts/write-local-env.mjs</code></p>
+  <p><code>npx supabase migration up --local</code></p>
+  <p><code>npm run seed</code></p>
+  <p><code>npm run dev -- --host 0.0.0.0 --port 5173</code></p>
+  <p style="margin-top:16px">Windows: <code>installer\windows\Start-Server.bat</code>. Full runbook: <code>docs/customer/SERVER-INSTALL.md</code></p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Proof on localhost</div>
+  <h2>The six beats, as captured</h2>
+  <div class="grid">
+    <div class="card">
+      <img src="assets/shots/e2e_1_employee_prereg_otp.jpg" alt="OTP minted" style="width:100%;border-radius:8px" />
+      <p style="font-size:14px;margin-top:8px">1. Employee books (Rahul, OTP 661871).</p>
+    </div>
+    <div class="card">
+      <img src="assets/shots/ananya_otp_search.jpg" alt="OTP at the desk" style="width:100%;border-radius:8px" />
+      <p style="font-size:14px;margin-top:8px">3. Guard finds Ananya by OTP 454178.</p>
+    </div>
+    <div class="card">
+      <img src="assets/shots/ananya_checked_in.jpg" alt="Checked in" style="width:100%;border-radius:8px" />
+      <p style="font-size:14px;margin-top:8px">4–5. ID + photo + badge B-219 → entered.</p>
+    </div>
+    <div class="card">
+      <img src="assets/shots/ananya_checked_out.jpg" alt="Badge returned" style="width:100%;border-radius:8px" />
+      <p style="font-size:14px;margin-top:8px">6. Badge returned — she is no longer inside.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Roles</div>
+  <h2>Who does what — enforced in the database</h2>
+  <table>
+    <tr><th>Role</th><th>Does</th><th>Cannot</th></tr>
+    <tr><td>Employee (staff)</td><td>Pre-register a visitor, see own department</td><td>Check in, issue a badge, edit roles</td></tr>
+    <tr><td>HOD</td><td>Pre-approve, approve walk-ins for their department</td><td>Admit at the gate, manage all users</td></tr>
+    <tr><td>Guard</td><td>OTP lookup, ID + photo, badge in/out</td><td>Mint a pass, approve a visit, clear a blacklist</td></tr>
+    <tr><td>Admin</td><td>Users, departments, logs, reports, blacklist</td><td>Write visit status (read-only over visits)</td></tr>
+    <tr><td>CEO</td><td>Second signature to lift a blacklist</td><td>Day-to-day visitor desk</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <div class="kicker">On the premises</div>
+  <h2>How the system is installed inside the mall</h2>
+  <div class="grid">
+    <div class="card">
+      <p><strong>One server PC</strong> in the security office or IT room.</p>
+      <ul>
+        <li>Docker runs Postgres, Auth, Storage, Realtime.</li>
+        <li>The Secure Gate web app is served on the LAN.</li>
+        <li>Mail for OTPs goes to the mall’s SMTP (or an internal catcher).</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p><strong>Clients</strong></p>
+      <ul>
+        <li>Guards / employees: Windows <em>Secure Gate</em> .exe — green light when the server answers, then login.</li>
+        <li>Phones: install the PWA from the same LAN URL and pre-register a visitor from anywhere in the building.</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:20px"><span class="dot"></span>Green light = app + local database both answering. No public cloud in that path.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Cloud vs premises</div>
+  <h2>Where the database lives</h2>
+  <table>
+    <tr><th></th><th>On-premise (this delivery)</th><th>Cloud hosted</th></tr>
+    <tr><td>Data residency</td><td>Disk in this building</td><td>Vendor region; you trust their DPA</td></tr>
+    <tr><td>Internet outage</td><td>Gate still works on the LAN</td><td>Gate stops if the WAN is down</td></tr>
+    <tr><td>Who patches Postgres</td><td>Mall IT + our runbook</td><td>The vendor</td></tr>
+    <tr><td>Capacity</td><td>Sized for this site</td><td>Elastic, shared tenancy</td></tr>
+    <tr><td>OTP email/SMS</td><td>Customer SMTP + GSM gateway</td><td>Usually a SaaS mailer</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <div class="kicker">Quest Mall</div>
+  <h2>How the mall benefits</h2>
+  <ul>
+    <li>The paper register is replaced by a 17-column visitors log the admin can print or export.</li>
+    <li>A fire marshal list — who is inside — is live, not a clipboard from an hour ago.</li>
+    <li>A visitor cannot be in twice: one open visit per phone, enforced in Postgres.</li>
+    <li>Blacklist is two-person (admin flags, CEO clears). A single operator cannot wave someone through.</li>
+    <li>Badges are numbered assets: issued at entry, demanded at exit, reusable the next minute.</li>
+    <li>Brand stays Quest gold / navy. No third-party logo on the guard screen.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Roadmap</div>
+  <h2>What can be added later — not in this delivery</h2>
+  <ul>
+    <li>Live GSM modem for real SMS (today SMS is logged; email already sends).</li>
+    <li>Kiosk in the lobby (the route already exists) with a dedicated tablet.</li>
+    <li>WhatsApp file-share of the pass (already a button; no Meta Business account needed).</li>
+    <li>Entry-point cameras writing which door was used (column exists; no writer yet).</li>
+    <li>Hindi UI, digital NDA pad, scheduled auto-checkout — listed in the product charter as later work.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Go-live</div>
+  <h2>Questions we must ask before turning this on at Quest Mall</h2>
+  <ul>
+    <li>Where does the server sit (UPS, lockable rack, whose key)?</li>
+    <li>What is the LAN subnet the guard PCs and HODs’ phones will use?</li>
+    <li>Who is the SMTP relay (and the From: address) for visitor OTPs?</li>
+    <li>Is there a GSM modem / DLT template if real SMS is required on day one?</li>
+    <li>Who are the first Admin, HODs, guards — names, emails, departments?</li>
+    <li>Retention: how many days of visitor photos may stay on disk (default 365)?</li>
+    <li>Printer at the desk: thermal badge, or a numbered plastic card only?</li>
+    <li>Who holds the CEO role for blacklist removal?</li>
+    <li>Backup: nightly copy of the Postgres volume to which disk / whose offsite?</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Training</div>
+  <h2>Who clicks what on day one</h2>
+  <ul>
+    <li>Employee (desktop or phone PWA): Visitors → Pre-Register a Visitor. Read the OTP to the guest.</li>
+    <li>Visitor: no app. Quote the six digits. Hand over ID. Wear the badge. Return it.</li>
+    <li>Guard (Secure Gate .exe, green light): Scan Pass → OTP → ID + photo → badge → Check In. Exit: return the badge number.</li>
+    <li>HOD: approve or decline walk-ins. Admin: users and the visitors log — never a check-in.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Demo</div>
+  <h2>Logins for the working local system</h2>
+  <p>Password for all seeded users: <strong>demo123</strong></p>
+  <table>
+    <tr><th>Who</th><th>Email</th></tr>
+    <tr><td>Admin</td><td>admin@demo.vms</td></tr>
+    <tr><td>Employee</td><td>staff.it@demo.vms</td></tr>
+    <tr><td>Guard</td><td>guard@demo.vms</td></tr>
+    <tr><td>HOD (IT)</td><td>hod.it@demo.vms</td></tr>
+  </table>
+  <p style="margin-top:24px">App: http://localhost:5173 · Mail (OTP inbox): http://127.0.0.1:54324</p>
+  <p>Play the journey video once with the customer, then let a guard repeat it on a demo laptop with <code>staff.it@demo.vms</code> / <code>guard@demo.vms</code>.</p>
+</section>
+
+</div>
+<div class="nav"><span id="pos">1</span> / <span id="tot"></span> · ← →</div>
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  document.getElementById('tot').textContent = slides.length;
+  let i = 0;
+  function show(n) {
+    i = (n + slides.length) % slides.length;
+    slides.forEach((s, k) => s.classList.toggle('on', k === i));
+    document.getElementById('pos').textContent = String(i + 1);
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(i + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(i - 1); }
+  });
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('a,button,input,textarea,select')) return;
+    show(e.clientX < window.innerWidth / 3 ? i - 1 : i + 1);
+  });
+</script>
+</body>
+</html>

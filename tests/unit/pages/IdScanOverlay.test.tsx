@@ -201,6 +201,21 @@ describe('M-AI-OCR-UI: IdScanOverlay close', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it('error phase lets the guard type the card when OCR cannot read it', async () => {
+    mockRecognise.mockRejectedValue(new Error('Inference crashed'));
+    const onScanned = vi.fn();
+    render(<IdScanOverlay onScanned={onScanned} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByText('Capture Card'));
+    await waitFor(() => expect(screen.getByText(/Inference crashed/)).toBeInTheDocument());
+    expect(screen.getByText('Enter details from the card')).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText('e.g. 9012'), { target: { value: '9012' } });
+    fireEvent.change(screen.getByPlaceholderText('As on the ID card'), { target: { value: 'Rahul Menon' } });
+    fireEvent.click(screen.getByRole('button', { name: /Use these details/i }));
+    expect(onScanned).toHaveBeenCalledWith(expect.objectContaining({
+      idType: 'Aadhaar', idLast4: '9012', name: 'Rahul Menon',
+    }));
+  });
+
   it('the review phase offers a Close button alongside Use Details/Retake', async () => {
     const onClose = vi.fn();
     render(<IdScanOverlay onScanned={vi.fn()} onClose={onClose} />);

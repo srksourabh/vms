@@ -1,6 +1,35 @@
 import { useState } from 'react';
 import { supabase } from '../../supabaseClient';
 import { safeErrorMessage } from '../../lib/errors';
+import { sendOtpEmail } from '../../lib/otpDelivery';
+
+// Where the gate OTP for an approved walk-in is emailed. On-prem this is the
+// security desk's mailbox; the code also arrives as an in-app guard
+// notification (migration 094) and is recorded in otp_deliveries.
+const SECURITY_EMAIL = 'security-gate@securegate.local';
+
+// Best-effort: dispatch the freshly-approved walk-in's OTP to security. Never
+// throws — the notification + otp_deliveries log are the source of truth.
+async function dispatchSecurityOtp(visitId: string): Promise<void> {
+  try {
+    const { data } = await supabase
+      .from('visits')
+      .select('otp_code, ref_number, visitor:visitors(full_name)')
+      .eq('id', visitId)
+      .single();
+    const otp = (data as any)?.otp_code as string | undefined;
+    if (!otp) return;
+    await sendOtpEmail({
+      to: SECURITY_EMAIL,
+      visitorName: (data as any)?.visitor?.full_name ?? 'Walk-in visitor',
+      otp,
+      refNumber: (data as any)?.ref_number ?? '',
+      audience: 'security',
+    });
+  } catch {
+    /* email is best-effort; ignore */
+  }
+}
 
 // Takes no arguments: the only decisions left act on a single visit id, and
 // the department scope is enforced inside the approve_visit / reject_visit
@@ -26,7 +55,8 @@ export function useVisitDecisions() {
         ? await rpc('approve_visit', { visit_id: visitId })
         : await rpc('reject_visit', { visit_id: visitId, reason: reason || 'Rejected by HOD' });
       if (err) { setError(safeErrorMessage(err, 'Action failed.')); return; }
-      flash(approved ? 'Visitor approved successfully.' : 'Visit rejected.');
+      if (approved) void dispatchSecurityOtp(visitId);
+      flash(approved ? 'Visitor approved — OTP sent to security.' : 'Visit rejected.');
     } catch (err) { setError(safeErrorMessage(err, 'Action failed.')); }
     finally { setActing(null); }
   };

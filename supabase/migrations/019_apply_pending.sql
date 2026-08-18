@@ -127,6 +127,7 @@ $$;
 
 -- ── 016: Least-privilege SELECT policies ────────────────────────────────────
 drop policy if exists "photos: authenticated can read" on storage.objects;
+drop policy if exists "photos: guard/admin can read" on storage.objects;
 create policy "photos: guard/admin can read"
   on storage.objects for select to authenticated
   using (
@@ -135,6 +136,7 @@ create policy "photos: guard/admin can read"
   );
 
 drop policy if exists "profiles: all authenticated can read" on public.profiles;
+drop policy if exists "profiles: read scoped by role" on public.profiles;
 create policy "profiles: read scoped by role"
   on public.profiles for select to authenticated
   using (
@@ -143,6 +145,7 @@ create policy "profiles: read scoped by role"
   );
 
 drop policy if exists "visitors: all authenticated can read" on public.visitors;
+drop policy if exists "visitors: read scoped by role" on public.visitors;
 create policy "visitors: read scoped by role"
   on public.visitors for select to authenticated
   using (

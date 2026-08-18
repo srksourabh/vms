@@ -1,3 +1,9 @@
+// @vitest-environment node
+//
+// This live integration file does real network I/O (Supabase Storage multipart
+// upload included). It must run in the Node environment: under jsdom the
+// storage upload's fetch fails ("fetch failed") against the local http stack.
+//
 // CHECK for goal.md S9 + S10 (🎯, SECURITY BASELINE SEC-1/2/3) — FR ref: NFR-04, FR-CAM-13
 //
 // These are DENIAL tests: they log in as the WRONG role (or unauthenticated) and

@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS recurring_visits (
 ALTER TABLE recurring_visits ENABLE ROW LEVEL SECURITY;
 
 -- HOD can see their department's recurring visits
+drop policy if exists "hod_select_recurring" on recurring_visits;
 CREATE POLICY "hod_select_recurring" ON recurring_visits
   FOR SELECT USING (
     (auth.jwt() -> 'app_metadata' ->> 'role') IN ('hod', 'admin', 'super_admin')
@@ -41,6 +42,7 @@ CREATE POLICY "hod_select_recurring" ON recurring_visits
   );
 
 -- Only HOD of the department or admin can insert
+drop policy if exists "hod_insert_recurring" on recurring_visits;
 CREATE POLICY "hod_insert_recurring" ON recurring_visits
   FOR INSERT WITH CHECK (
     (auth.jwt() -> 'app_metadata' ->> 'role') IN ('hod', 'admin', 'super_admin')
@@ -51,6 +53,7 @@ CREATE POLICY "hod_insert_recurring" ON recurring_visits
   );
 
 -- HOD can update/deactivate their series
+drop policy if exists "hod_update_recurring" on recurring_visits;
 CREATE POLICY "hod_update_recurring" ON recurring_visits
   FOR UPDATE USING (
     (auth.jwt() -> 'app_metadata' ->> 'role') IN ('hod', 'admin', 'super_admin')

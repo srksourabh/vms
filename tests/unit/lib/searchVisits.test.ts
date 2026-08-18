@@ -7,10 +7,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // script per-column responses.
 const mockVisitsIlike = vi.hoisted(() => vi.fn());
 const mockVisitsIn = vi.hoisted(() => vi.fn());
+const mockVisitsEq = vi.hoisted(() => vi.fn());
 const mockVisitorsIlike = vi.hoisted(() => vi.fn());
 const calls = vi.hoisted(() => ({
   visitsIlike: [] as [string, string][],
   visitsIn: [] as [string, string[]][],
+  visitsEq: [] as [string, string][],
   visitorsIlike: [] as [string, string][],
 }));
 
@@ -24,6 +26,12 @@ vi.mock('../../../src/supabaseClient', () => {
   visitsBuilder.in = (col: string, ids: string[]) => {
     calls.visitsIn.push([col, ids]);
     return mockVisitsIn(col, ids);
+  };
+  // .eq is the OTP leg (visits.otp_code = <code>) — a 4–8 digit query also
+  // triggers an exact OTP lookup (migration 094).
+  visitsBuilder.eq = (col: string, val: string) => {
+    calls.visitsEq.push([col, val]);
+    return mockVisitsEq(col, val);
   };
 
   const visitorsBuilder: any = {};
@@ -63,8 +71,10 @@ beforeEach(() => {
   calls.visitsIlike = [];
   calls.visitsIn = [];
   calls.visitorsIlike = [];
+  calls.visitsEq = [];
   mockVisitsIlike.mockReset().mockResolvedValue({ data: [], error: null });
   mockVisitsIn.mockReset().mockResolvedValue({ data: [], error: null });
+  mockVisitsEq.mockReset().mockResolvedValue({ data: [], error: null });
   mockVisitorsIlike.mockReset().mockResolvedValue({ data: [], error: null });
 });
 
@@ -103,6 +113,23 @@ describe('searchAllVisits — matching', () => {
     const result = await searchAllVisits('Priya');
     expect(result.map((v) => v.id)).toContain('v-name');
     expect(calls.visitsIn[0][1]).toEqual(['visitor-9']);
+  });
+
+  it('finds a visit by its exact OTP (a 4–8 digit query)', async () => {
+    const visit = makeVisit({ id: 'v-otp', otp_code: '405066' });
+    mockVisitsEq.mockImplementation((col: string) =>
+      col === 'otp_code'
+        ? Promise.resolve({ data: [visit], error: null })
+        : Promise.resolve({ data: [], error: null }),
+    );
+    const result = await searchAllVisits('405066');
+    expect(result.map((v) => v.id)).toContain('v-otp');
+    expect(calls.visitsEq.some(([col, val]) => col === 'otp_code' && val === '405066')).toBe(true);
+  });
+
+  it('does not run an OTP lookup for a non-numeric query', async () => {
+    await searchAllVisits('Priya');
+    expect(calls.visitsEq.length).toBe(0);
   });
 
   it('finds a visit by a phone-number substring (query with 2+ digits)', async () => {

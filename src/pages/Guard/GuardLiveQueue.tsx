@@ -104,6 +104,11 @@ export default function GuardLiveQueue(): React.ReactElement {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [error, setError] = useState('');
+  // Return-a-badge: the guard types the number printed on the card the visitor
+  // hands back, and the matching on-site visit is checked out. The badge is
+  // then free to reissue (a new check-in can type the same number). Runs off
+  // the already-loaded `inside` list — no extra query.
+  const [badgeInput, setBadgeInput] = useState('');
 
   useEffect(() => {
     const t = setInterval(() => setClock(new Date()), 1000);
@@ -170,6 +175,22 @@ export default function GuardLiveQueue(): React.ReactElement {
     setActiveVisit(v);
   };
 
+  const checkOutByBadge = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    const q = badgeInput.trim();
+    if (!q) return;
+    const match = inside.find(
+      (v) => (v.visitor_card_number ?? '').trim().toLowerCase() === q.toLowerCase(),
+    );
+    if (!match) {
+      setError(`No visitor on site is holding badge "${q}". Check the number and try again.`);
+      return;
+    }
+    setBadgeInput('');
+    setExitTarget(match); // same CardReturnConfirm + logVisitExit write as a row click
+  };
+
   const printBadge = () => { if (liveActive) printVisitorBadge(); };
 
   // The exit WRITE, reached only through CardReturnConfirm — the dialog names
@@ -218,6 +239,25 @@ export default function GuardLiveQueue(): React.ReactElement {
               the list that lane opens, so a separate summary line would be a
               second place for the same fact to be stated. */}
         </div>
+
+        {/* Return a badge — check a visitor out by the badge number they hand
+            back at the gate. The number is then free to issue again. */}
+        <form onSubmit={checkOutByBadge} className="mb-4 flex flex-wrap items-end gap-2">
+          <div className="flex-1 min-w-[200px]">
+            <label htmlFor="return-badge" className="label">Return a badge — type the badge number to check out</label>
+            <input
+              id="return-badge"
+              className="input"
+              value={badgeInput}
+              onChange={(e) => setBadgeInput(e.target.value)}
+              placeholder="e.g. B-207"
+              autoComplete="off"
+            />
+          </div>
+          <button type="submit" className="btn-primary shrink-0" disabled={!badgeInput.trim()}>
+            Check out by badge
+          </button>
+        </form>
 
         <div className="mb-4">
           <EntryExitTabs lane={lane} onSelect={setLane} counts={laneCounts} loading={visitsLoading} />

@@ -6,6 +6,8 @@ dist/
 coverage/
 playwright-report/
 test-results/
+desktop/node_modules/
+desktop/dist/
 
 # Synced from node_modules by scripts/sync-ort-assets.mjs (predev/prebuild).
 # Never commit: 13 MB, and it must always match the installed onnxruntime-web.
