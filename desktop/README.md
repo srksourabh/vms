@@ -33,3 +33,9 @@ npm run pack:win
 `pack:win` writes `SecureGate-Portable.exe` (no install — double-click).
 The Inno script wraps it as `SecureGate-Setup.exe` with a Start Menu shortcut
 and a “Start Secure Gate server” helper.
+
+Linux CI can also emit the same PE32 portable (electron-builder + NSIS
+binaries; no Wine required for the portable target). Do not commit the
+~67 MB `.exe` — it is a build artifact. Copy it onto guard PCs after
+the on-prem server is up; the splash shows a **green light** only when
+`http://127.0.0.1:5173` and Auth health both answer.

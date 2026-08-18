@@ -11,6 +11,10 @@
   },
   "author": "Quest Mall",
   "license": "UNLICENSED",
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3"
+  },
   "build": {
     "appId": "in.questmall.securegate",
     "productName": "Secure Gate",

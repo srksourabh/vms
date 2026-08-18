@@ -73,6 +73,44 @@
     <li><strong>Time of return.</strong> Guard types the returned badge number. The confirm dialog names that number; the tick is mandatory. Check-out frees the badge.</li>
   </ol>
 
+  <p>Recorded on this local host (visitor Rahul Menon, OTP <code>661871</code>, badge <code>B-218</code>, ref <code>VIS-20260818-0010</code>):</p>
+  <figure>
+    <img class="shot" src="assets/shots/login.jpg" alt="Secure Gate login" />
+    <figcaption>Login — one card for every role. Demo password <code>demo123</code>.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/e2e_1_employee_prereg_otp.jpg" alt="Employee pre-register success with OTP" />
+    <figcaption>1. Employee pre-registers one visitor. The server mints a 6-digit OTP and a visit ref.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/mailpit_otp.jpg" alt="OTP email in Mailpit" />
+    <figcaption>2. Visitor is coming — OTP email is in the on-prem mailbox (Mailpit in demo; mall SMTP in production).</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/guard_otp_lookup.jpg" alt="Guard finds visitor by OTP" />
+    <figcaption>3. Security types the OTP on Scan Pass. The record is shown before any camera opens.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/e2e_4_badge_issue.jpg" alt="ID verified, badge number typed, Check In enabled" />
+    <figcaption>4. Formalities: ID last-four + photograph + physical badge number. Check In stays disabled until all three exist.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/e2e_4b_checked_in_success.jpg" alt="Checked-in success" />
+    <figcaption>5. Visitor entering — status is checked in. Host notified in-app.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/e2e_5_rahul_checked_in.jpg" alt="Entry and Exit shows visitor inside" />
+    <figcaption>Entry &amp; Exit → Checked In. The person is on the fire-marshal list until the badge comes back.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/e2e_6_rahul_checked_out.jpg" alt="Badge returned, visitor checked out" />
+    <figcaption>6. Time of return — badge B-218 collected, visit closed, card free to reissue.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/admin_visitors_log.jpg" alt="Admin visitors log" />
+    <figcaption>Admin Visitors Log is the paper register’s replacement — the same rows as CSV and print.</figcaption>
+  </figure>
+
   <h2>3. How Quest Mall benefits</h2>
   <ul>
     <li><strong>The book is replaced, not copied.</strong> Admin Visitors Log is the register: on screen, CSV, and print. Seventeen columns, IST timestamps, no zone suffix games.</li>
@@ -124,11 +162,20 @@
 
   <h2>7. Desktop .exe and mobile PWA</h2>
   <h3>Windows</h3>
-  <p><code>desktop/</code> is an Electron shell. It does not ship the database. It pings the on-prem server and refuses to open login until both the web app and Auth answer — that is the green light. Build on a Windows PC:</p>
+  <p><code>desktop/</code> is an Electron shell. It does not ship the database. It pings the on-prem server and refuses to open login until both the web app and Auth answer — that is the green light.</p>
   <pre><code>cd desktop
 npm install
 npm run pack:win</code></pre>
-  <p>That yields <code>SecureGate-Portable.exe</code> (double-click, no install). Compile <code>installer/windows/SecureGate.iss</code> in Inno Setup for a Start Menu installer that also drops “Start Secure Gate server”.</p>
+  <p>That yields <code>SecureGate-Portable.exe</code> (double-click, no install). It is a thin client: the guard still needs the server running (<code>Start-Server.bat</code>). Compile <code>installer/windows/SecureGate.iss</code> in Inno Setup for a Start Menu installer that also drops “Start Secure Gate server”.</p>
+  <p>The portable .exe is a PE32 NSIS self-extractor. Do not commit the 67&nbsp;MB binary to git; build it on the delivery laptop and copy it onto the guard PCs.</p>
+  <figure>
+    <img class="shot" src="assets/shots/desktop_green_light.jpg" alt="Desktop app green connection light" />
+    <figcaption>Windows / desktop shell: green light means the web app and local Auth are both answering. Nothing is sent to the cloud.</figcaption>
+  </figure>
+  <figure>
+    <img class="shot" src="assets/shots/desktop_login.jpg" alt="Login page after Open Secure Gate" />
+    <figcaption>Open Secure Gate loads the same login the browser uses — then the guard or employee signs in.</figcaption>
+  </figure>
   <h3>Mobile PWA</h3>
   <p>Production builds register <code>/sw.js</code> and advertise <code>/manifest.webmanifest</code>. On HTTPS (or localhost) Chrome/Edge/Safari offer “Install app”. Staff land on Visitors and can pre-register. Guards should still use a desktop/tablet for the camera and badge typing — the phone is the employee request surface.</p>
   <p>PWA install on a raw HTTP LAN IP is blocked by browsers. For phones on the mall LAN, put a reverse proxy with a local certificate (Caddy + internal CA, or mkcert) in front of port 5173. That is a go-live question, not a code change.</p>
@@ -157,6 +204,17 @@ npm run pack:win</code></pre>
     <li>SMS is not a live modem in this box. Email is live against the on-prem relay.</li>
     <li>The Windows .exe is a client. The database is Docker on the server. One PC can be both if Docker Desktop is installed on it.</li>
   </ul>
+
+  <h2>11. Training — who clicks what</h2>
+  <table>
+    <tr><th>Person</th><th>Open</th><th>Do this</th></tr>
+    <tr><td>Employee</td><td>Desktop app or phone PWA → login staff</td><td>Visitors → Pre-Register a Visitor. Read the OTP to the guest (or they read the email).</td></tr>
+    <tr><td>Visitor</td><td>Nothing to install</td><td>Arrive. Quote the six digits. Hand over ID. Wear the badge. Return it on the way out.</td></tr>
+    <tr><td>Guard</td><td>Secure Gate .exe (green light) → login guard</td><td>Scan Pass → type OTP → ID + photo → badge number → Check In. At exit: Entry &amp; Exit → Return a badge → tick → confirm.</td></tr>
+    <tr><td>HOD</td><td>Same app, hod login</td><td>Walk-in requests on the dashboard. Approve or decline with a reason.</td></tr>
+    <tr><td>Admin</td><td>admin login</td><td>Settings → Roles &amp; Users to add people. Visitors Log / Reports for the book. Never check anyone in.</td></tr>
+  </table>
+  <p>Play the journey video once with the customer, then let a guard repeat it on a demo laptop with <code>staff.it@demo.vms</code> / <code>guard@demo.vms</code>.</p>
 </main>
 </body>
 </html>

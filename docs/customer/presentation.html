@@ -79,6 +79,29 @@
 </section>
 
 <section class="slide">
+  <div class="kicker">Proof on localhost</div>
+  <h2>The six beats, as captured</h2>
+  <div class="grid">
+    <div class="card">
+      <img src="assets/shots/e2e_1_employee_prereg_otp.jpg" alt="OTP minted" style="width:100%;border-radius:8px" />
+      <p style="font-size:14px;margin-top:8px">1–2. Employee books. OTP 661871.</p>
+    </div>
+    <div class="card">
+      <img src="assets/shots/guard_otp_lookup.jpg" alt="OTP at the desk" style="width:100%;border-radius:8px" />
+      <p style="font-size:14px;margin-top:8px">3. Guard finds the visitor by OTP.</p>
+    </div>
+    <div class="card">
+      <img src="assets/shots/e2e_4_badge_issue.jpg" alt="Badge typed" style="width:100%;border-radius:8px" />
+      <p style="font-size:14px;margin-top:8px">4. ID + photo + badge B-218.</p>
+    </div>
+    <div class="card">
+      <img src="assets/shots/e2e_6_rahul_checked_out.jpg" alt="Badge returned" style="width:100%;border-radius:8px" />
+      <p style="font-size:14px;margin-top:8px">5–6. Entered, then badge returned.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
   <div class="kicker">Roles</div>
   <h2>Who does what — enforced in the database</h2>
   <table>
@@ -169,6 +192,17 @@
 </section>
 
 <section class="slide">
+  <div class="kicker">Training</div>
+  <h2>Who clicks what on day one</h2>
+  <ul>
+    <li>Employee (desktop or phone PWA): Visitors → Pre-Register a Visitor. Read the OTP to the guest.</li>
+    <li>Visitor: no app. Quote the six digits. Hand over ID. Wear the badge. Return it.</li>
+    <li>Guard (Secure Gate .exe, green light): Scan Pass → OTP → ID + photo → badge → Check In. Exit: return the badge number.</li>
+    <li>HOD: approve or decline walk-ins. Admin: users and the visitors log — never a check-in.</li>
+  </ul>
+</section>
+
+<section class="slide">
   <div class="kicker">Demo</div>
   <h2>Logins for the working local system</h2>
   <p>Password for all seeded users: <strong>demo123</strong></p>
@@ -180,7 +214,7 @@
     <tr><td>HOD (IT)</td><td>hod.it@demo.vms</td></tr>
   </table>
   <p style="margin-top:24px">App: http://localhost:5173 · Mail (OTP inbox): http://127.0.0.1:54324</p>
-  <p>Full runbook: <code>docs/customer/QUEST-MALL-VMS-ONPREM.html</code></p>
+  <p>Play the journey video once with the customer, then let a guard repeat it on a demo laptop with <code>staff.it@demo.vms</code> / <code>guard@demo.vms</code>.</p>
 </section>
 
 </div>
