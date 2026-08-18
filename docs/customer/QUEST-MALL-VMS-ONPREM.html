@@ -73,7 +73,7 @@
     <li><strong>Time of return.</strong> Guard types the returned badge number. The confirm dialog names that number; the tick is mandatory. Check-out frees the badge.</li>
   </ol>
 
-  <p>Recorded on this local host (visitor Rahul Menon, OTP <code>661871</code>, badge <code>B-218</code>, ref <code>VIS-20260818-0010</code>):</p>
+  <p>Recorded on this local host. First pass: Rahul Menon, OTP <code>661871</code>, badge <code>B-218</code>, ref <code>VIS-20260818-0010</code>. Repeated live: Ananya Rao, OTP <code>454178</code>, badge <code>B-219</code>, ref <code>VIS-20260818-0011</code> — both ended <code>checked_out</code> on the local Postgres.</p>
   <figure>
     <img class="shot" src="assets/shots/login.jpg" alt="Secure Gate login" />
     <figcaption>Login — one card for every role. Demo password <code>demo123</code>.</figcaption>
@@ -83,28 +83,28 @@
     <figcaption>1. Employee pre-registers one visitor. The server mints a 6-digit OTP and a visit ref.</figcaption>
   </figure>
   <figure>
-    <img class="shot" src="assets/shots/mailpit_otp.jpg" alt="OTP email in Mailpit" />
-    <figcaption>2. Visitor is coming — OTP email is in the on-prem mailbox (Mailpit in demo; mall SMTP in production).</figcaption>
+    <img class="shot" src="assets/shots/ananya_otp_email.jpg" alt="OTP email in Mailpit for Ananya Rao" />
+    <figcaption>2. Visitor is coming — OTP 454178 emailed on-prem (Mailpit). Same message would go through mall SMTP in production.</figcaption>
   </figure>
   <figure>
-    <img class="shot" src="assets/shots/guard_otp_lookup.jpg" alt="Guard finds visitor by OTP" />
-    <figcaption>3. Security types the OTP on Scan Pass. The record is shown before any camera opens.</figcaption>
+    <img class="shot" src="assets/shots/ananya_otp_search.jpg" alt="Guard finds Ananya by OTP" />
+    <figcaption>3. Security types 454178 on Scan Pass. Ananya Rao, Pre-approved, still outside.</figcaption>
   </figure>
   <figure>
     <img class="shot" src="assets/shots/e2e_4_badge_issue.jpg" alt="ID verified, badge number typed, Check In enabled" />
-    <figcaption>4. Formalities: ID last-four + photograph + physical badge number. Check In stays disabled until all three exist.</figcaption>
+    <figcaption>4. Formalities (Rahul pass, same desk): ID last-four + photograph + physical badge number. Check In stays disabled until all three exist.</figcaption>
   </figure>
   <figure>
-    <img class="shot" src="assets/shots/e2e_4b_checked_in_success.jpg" alt="Checked-in success" />
-    <figcaption>5. Visitor entering — status is checked in. Host notified in-app.</figcaption>
+    <img class="shot" src="assets/shots/ananya_checked_in.jpg" alt="Ananya Rao checked in successfully" />
+    <figcaption>5. Visitor entering — Ananya checked in 09:31 IST, badge B-219, host Neha Gupta.</figcaption>
   </figure>
   <figure>
-    <img class="shot" src="assets/shots/e2e_5_rahul_checked_in.jpg" alt="Entry and Exit shows visitor inside" />
-    <figcaption>Entry &amp; Exit → Checked In. The person is on the fire-marshal list until the badge comes back.</figcaption>
+    <img class="shot" src="assets/shots/ananya_entry_exit.jpg" alt="Ananya on Entry and Exit checked in" />
+    <figcaption>Entry &amp; Exit → Checked In. She is on the fire-marshal list until the badge comes back.</figcaption>
   </figure>
   <figure>
-    <img class="shot" src="assets/shots/e2e_6_rahul_checked_out.jpg" alt="Badge returned, visitor checked out" />
-    <figcaption>6. Time of return — badge B-218 collected, visit closed, card free to reissue.</figcaption>
+    <img class="shot" src="assets/shots/ananya_checked_out.jpg" alt="Ananya Rao checked out after returning badge" />
+    <figcaption>6. Time of return — B-219 collected, Ananya gone from Checked In, card free to reissue.</figcaption>
   </figure>
   <figure>
     <img class="shot" src="assets/shots/admin_visitors_log.jpg" alt="Admin visitors log" />
