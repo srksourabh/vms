@@ -4,6 +4,22 @@
 > **Who runs this**: the salesperson / engineer showing the product.
 > **Time needed**: ~12 minutes for the full happy path.
 > **Reset command**: `npm run seed` (restores clean demo data in ~15 s).
+> **On-prem local host**: `npx supabase start` then `npm run seed` then `npm run dev -- --host 0.0.0.0 --port 5173`. Slide deck: `docs/customer/presentation.html`.
+
+---
+
+## On-prem OTP happy path (the delivery demo)
+
+All passwords: `demo123`. App: http://localhost:5173
+
+1. **Employee books.** Sign in as `staff.it@demo.vms`. Click **+ Pre-Register a Visitor**. Name, 10-digit mobile, vendor, email, schedule (OK on the datetime field). Submit. Read the 6-digit OTP out loud. Mailpit at http://127.0.0.1:54324 has the same email.
+2. **Visitor arrives.** They tell the guard the OTP. No app on the visitor's phone is required.
+3. **Security formalities.** Sign in as `guard@demo.vms`. **Scan Pass** → type the OTP → Search. Confirm host and department.
+4. **Badge.** Check In → Scan ID (camera, or **Enter details from the card** if OCR/camera fails) → photo (camera or **upload from device**) → type badge e.g. `B-218` → Check In.
+5. **Visitor entering.** Status is checked in. **Entry & Exit** shows them under Checked In.
+6. **Return.** Type `B-218` in **Return a badge**. Tick “card collected”. Complete check-out. The number is free to issue again.
+
+Walk-in variant: guard **Register Walk-in** → HOD `hod.it@demo.vms` approves on Overview → OTP is mailed to security → same gate steps from 3.
 
 ---
 

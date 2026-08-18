@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Secure Gate — Quest Mall customer presentation</title>
+  <style>
+    :root { --gold:#C6A15B; --navy:#16161A; --paper:#FBFAF8; --muted:#7C766C; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; background:var(--navy); color:var(--paper); font-family:"Segoe UI",system-ui,sans-serif; }
+    .deck { height:100vh; overflow:hidden; }
+    .slide { display:none; height:100vh; padding:56px 72px; }
+    .slide.on { display:flex; flex-direction:column; }
+    h1 { font-size:42px; font-weight:600; margin:0 0 12px; }
+    h2 { font-size:28px; font-weight:600; margin:0 0 20px; color:var(--gold); }
+    .kicker { letter-spacing:.22em; text-transform:uppercase; font-size:12px; color:var(--gold); margin-bottom:16px; }
+    p, li { font-size:18px; line-height:1.45; color:#E8E4DC; }
+    ul { margin:8px 0 0 18px; }
+    .nav { position:fixed; bottom:20px; right:28px; color:var(--muted); font-size:13px; }
+    table { border-collapse:collapse; width:min(920px,100%); }
+    th, td { text-align:left; padding:10px 12px; border-bottom:1px solid rgba(198,161,91,.25); font-size:16px; }
+    th { color:var(--gold); font-weight:600; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:28px; }
+    .card { background:#1E1D22; border:1px solid rgba(198,161,91,.28); border-radius:16px; padding:20px; }
+    .dot { display:inline-block; width:12px; height:12px; border-radius:50%; background:#22c55e; margin-right:8px; }
+    svg.flow { width:min(1000px,100%); height:auto; }
+  </style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<section class="slide on">
+  <div class="kicker">Quest Mall · On-premise</div>
+  <h1>Secure Gate</h1>
+  <p>Visitor management that stays inside the building. Employees pre-register. Security checks identity, issues a badge, and takes it back at exit.</p>
+  <p style="margin-top:28px;color:var(--gold)">Customer delivery briefing</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Requirement</div>
+  <h2>What the customer asked for</h2>
+  <ul>
+    <li>One admin panel: add/remove employees and security guards; see every visit, history, daily status, host-wise detail.</li>
+    <li>Employees pre-register a visitor: name, mobile, email, expected date &amp; time.</li>
+    <li>OTP generated and sent by email and SMS. Visitor quotes it at the gate.</li>
+    <li>Security searches the OTP, takes ID proof and photograph, types the badge number, grants entry.</li>
+    <li>On the way out the visitor returns the badge; typing that number checks them out and frees the badge.</li>
+    <li>Walk-in without a booking: security captures details → employee approves → OTP emailed to security.</li>
+    <li>All of it on the customer’s own premises. Data does not leave the site.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Journey</div>
+  <h2>The visitor’s day, in six beats</h2>
+  <svg class="flow" viewBox="0 0 1000 160" xmlns="http://www.w3.org/2000/svg">
+    <defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#C6A15B"/></marker></defs>
+    <g font-size="13" font-family="Segoe UI,sans-serif" text-anchor="middle" fill="#FBFAF8">
+      <rect x="8" y="40" width="140" height="64" rx="12" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="78" y="68">1. Employee</text><text x="78" y="88">pre-registers</text>
+      <rect x="176" y="40" width="140" height="64" rx="12" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="246" y="68">2. Visitor</text><text x="246" y="88">arrives + OTP</text>
+      <rect x="344" y="40" width="140" height="64" rx="12" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="414" y="68">3. ID + photo</text><text x="414" y="88">at the desk</text>
+      <rect x="512" y="40" width="140" height="64" rx="12" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="582" y="68">4. Badge</text><text x="582" y="88">number typed</text>
+      <rect x="680" y="40" width="140" height="64" rx="12" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="750" y="68">5. Enter</text><text x="750" y="88">checked in</text>
+      <rect x="848" y="40" width="140" height="64" rx="12" fill="#1E1D22" stroke="#C6A15B"/>
+      <text x="918" y="68">6. Return</text><text x="918" y="88">badge back</text>
+    </g>
+    <g stroke="#C6A15B" stroke-width="2" fill="none" marker-end="url(#a)">
+      <line x1="148" y1="72" x2="172" y2="72"/><line x1="316" y1="72" x2="340" y2="72"/>
+      <line x1="484" y1="72" x2="508" y2="72"/><line x1="652" y1="72" x2="676" y2="72"/>
+      <line x1="820" y1="72" x2="844" y2="72"/>
+    </g>
+  </svg>
+  <p>One predicate, one list, one badge number. The tile count is the length of the list it opens.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Roles</div>
+  <h2>Who does what — enforced in the database</h2>
+  <table>
+    <tr><th>Role</th><th>Does</th><th>Cannot</th></tr>
+    <tr><td>Employee (staff)</td><td>Pre-register a visitor, see own department</td><td>Check in, issue a badge, edit roles</td></tr>
+    <tr><td>HOD</td><td>Pre-approve, approve walk-ins for their department</td><td>Admit at the gate, manage all users</td></tr>
+    <tr><td>Guard</td><td>OTP lookup, ID + photo, badge in/out</td><td>Mint a pass, approve a visit, clear a blacklist</td></tr>
+    <tr><td>Admin</td><td>Users, departments, logs, reports, blacklist</td><td>Write visit status (read-only over visits)</td></tr>
+    <tr><td>CEO</td><td>Second signature to lift a blacklist</td><td>Day-to-day visitor desk</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <div class="kicker">On the premises</div>
+  <h2>How the system is installed inside the mall</h2>
+  <div class="grid">
+    <div class="card">
+      <p><strong>One server PC</strong> in the security office or IT room.</p>
+      <ul>
+        <li>Docker runs Postgres, Auth, Storage, Realtime.</li>
+        <li>The Secure Gate web app is served on the LAN.</li>
+        <li>Mail for OTPs goes to the mall’s SMTP (or an internal catcher).</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p><strong>Clients</strong></p>
+      <ul>
+        <li>Guards / employees: Windows <em>Secure Gate</em> .exe — green light when the server answers, then login.</li>
+        <li>Phones: install the PWA from the same LAN URL and pre-register a visitor from anywhere in the building.</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:20px"><span class="dot"></span>Green light = app + local database both answering. No public cloud in that path.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Cloud vs premises</div>
+  <h2>Where the database lives</h2>
+  <table>
+    <tr><th></th><th>On-premise (this delivery)</th><th>Cloud hosted</th></tr>
+    <tr><td>Data residency</td><td>Disk in this building</td><td>Vendor region; you trust their DPA</td></tr>
+    <tr><td>Internet outage</td><td>Gate still works on the LAN</td><td>Gate stops if the WAN is down</td></tr>
+    <tr><td>Who patches Postgres</td><td>Mall IT + our runbook</td><td>The vendor</td></tr>
+    <tr><td>Capacity</td><td>Sized for this site</td><td>Elastic, shared tenancy</td></tr>
+    <tr><td>OTP email/SMS</td><td>Customer SMTP + GSM gateway</td><td>Usually a SaaS mailer</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <div class="kicker">Quest Mall</div>
+  <h2>How the mall benefits</h2>
+  <ul>
+    <li>The paper register is replaced by a 17-column visitors log the admin can print or export.</li>
+    <li>A fire marshal list — who is inside — is live, not a clipboard from an hour ago.</li>
+    <li>A visitor cannot be in twice: one open visit per phone, enforced in Postgres.</li>
+    <li>Blacklist is two-person (admin flags, CEO clears). A single operator cannot wave someone through.</li>
+    <li>Badges are numbered assets: issued at entry, demanded at exit, reusable the next minute.</li>
+    <li>Brand stays Quest gold / navy. No third-party logo on the guard screen.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Roadmap</div>
+  <h2>What can be added later — not in this delivery</h2>
+  <ul>
+    <li>Live GSM modem for real SMS (today SMS is logged; email already sends).</li>
+    <li>Kiosk in the lobby (the route already exists) with a dedicated tablet.</li>
+    <li>WhatsApp file-share of the pass (already a button; no Meta Business account needed).</li>
+    <li>Entry-point cameras writing which door was used (column exists; no writer yet).</li>
+    <li>Hindi UI, digital NDA pad, scheduled auto-checkout — listed in the product charter as later work.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Go-live</div>
+  <h2>Questions we must ask before turning this on at Quest Mall</h2>
+  <ul>
+    <li>Where does the server sit (UPS, lockable rack, whose key)?</li>
+    <li>What is the LAN subnet the guard PCs and HODs’ phones will use?</li>
+    <li>Who is the SMTP relay (and the From: address) for visitor OTPs?</li>
+    <li>Is there a GSM modem / DLT template if real SMS is required on day one?</li>
+    <li>Who are the first Admin, HODs, guards — names, emails, departments?</li>
+    <li>Retention: how many days of visitor photos may stay on disk (default 365)?</li>
+    <li>Printer at the desk: thermal badge, or a numbered plastic card only?</li>
+    <li>Who holds the CEO role for blacklist removal?</li>
+    <li>Backup: nightly copy of the Postgres volume to which disk / whose offsite?</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Demo</div>
+  <h2>Logins for the working local system</h2>
+  <p>Password for all seeded users: <strong>demo123</strong></p>
+  <table>
+    <tr><th>Who</th><th>Email</th></tr>
+    <tr><td>Admin</td><td>admin@demo.vms</td></tr>
+    <tr><td>Employee</td><td>staff.it@demo.vms</td></tr>
+    <tr><td>Guard</td><td>guard@demo.vms</td></tr>
+    <tr><td>HOD (IT)</td><td>hod.it@demo.vms</td></tr>
+  </table>
+  <p style="margin-top:24px">App: http://localhost:5173 · Mail (OTP inbox): http://127.0.0.1:54324</p>
+  <p>Full runbook: <code>docs/customer/QUEST-MALL-VMS-ONPREM.html</code></p>
+</section>
+
+</div>
+<div class="nav"><span id="pos">1</span> / <span id="tot"></span> · ← →</div>
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  document.getElementById('tot').textContent = slides.length;
+  let i = 0;
+  function show(n) {
+    i = (n + slides.length) % slides.length;
+    slides.forEach((s, k) => s.classList.toggle('on', k === i));
+    document.getElementById('pos').textContent = String(i + 1);
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(i + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(i - 1); }
+  });
+</script>
+</body>
+</html>

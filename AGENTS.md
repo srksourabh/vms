@@ -79,3 +79,6 @@ secrets are not required — `.env` uses the local `supabase start` demo JWTs.
   which copies the ~13 MB `onnxruntime-web` WASM runtime into `public/ort/` (git-ignored);
   `vite.config.ts` has a matching middleware to serve `/ort/*`.
 - The CSP `connect-src` in `index.html` allows the local Supabase origin (`127.0.0.1:54321`).
+- PWA service worker registers only in **production** builds (`import.meta.env.PROD`). `npm run dev` must not cache. Installable from `vite preview` / a built serve. HTTP LAN phones need a local TLS proxy to install.
+- Windows thin client lives in `desktop/` (green connection light). It does not start Docker; `installer/windows/Start-Server.bat` / `scripts/onprem-up.sh` do. Customer slides: `docs/customer/presentation.html`.
+- ID scan: if OCR cannot read the card, the error phase offers **Enter details from the card** (`ManualIdEntry`) — type, last four, printed name. That is the on-prem fallback, not a demo backdoor.

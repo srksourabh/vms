@@ -1,0 +1,31 @@
+{
+  "name": "secure-gate-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Quest Mall Secure Gate desktop shell — connection light + login to the on-prem VMS.",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "pack:win": "electron-builder --win nsis portable --x64",
+    "pack:dir": "electron-builder --linux dir"
+  },
+  "author": "Quest Mall",
+  "license": "UNLICENSED",
+  "build": {
+    "appId": "in.questmall.securegate",
+    "productName": "Secure Gate",
+    "directories": { "output": "dist" },
+    "files": ["main.cjs", "preload.cjs", "splash.html", "package.json"],
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "../public/icons/icon-512.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "shortcutName": "Secure Gate"
+    },
+    "portable": { "artifactName": "SecureGate-Portable.exe" }
+  }
+}
