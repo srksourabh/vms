@@ -24,10 +24,14 @@ dependency, invoked as `npx supabase`.
    workflow (the old repo comment about "hand-applied, never db push" no longer holds; see
    migrations note below). It wipes data, so re-run the seed after.
 5. `npm run seed` — demo departments, users (password `demo123`) and sample visits.
-6. `npm run dev` — app at http://localhost:5173.
+6. `npm run dev` — app at http://localhost:5173. If a client on IPv4 cannot
+   connect (Vite sometimes binds `::1` only), restart with
+   `npm run dev -- --host 0.0.0.0 --port 5173`.
 
 Demo logins (all `demo123`): `admin@demo.vms`, `guard@demo.vms`, `staff.it@demo.vms`
-(employee), `hod.it@demo.vms`.
+(employee), `hod.it@demo.vms`, plus dummy trio `dummy.admin@demo.vms` /
+`dummy.emp@demo.vms` / `dummy.guard@demo.vms`. Hosted Supabase/Vercel/Resend
+secrets are not required — `.env` uses the local `supabase start` demo JWTs.
 
 ### Migrations are now replayable on a clean DB
 - `000_api_role_grants.sql` grants the PostgREST roles table access + default privileges —
@@ -65,9 +69,10 @@ Demo logins (all `demo123`): `admin@demo.vms`, `guard@demo.vms`, `staff.it@demo.
 - The guard **check-in photo step needs a webcam**; in a headless VM it errors with "camera
   device not found". Validate check-in/check-out/badge-return via the API/DB if you can't use
   a real camera — the flow is otherwise unchanged.
-- `tests/unit/pages/AdminLiveCheckIn.test.tsx` is time-of-day flaky right around IST midnight
-  (its fixtures use timestamps relative to `now()` against `istDayStart()`); it passes during
-  normal IST daytime. Not a code regression.
+- `tests/unit/pages/AdminLiveCheckIn.test.tsx` is time-of-day flaky whenever a
+  fixture stamped `hoursAgo(N)` falls before today's `istDayStart()` (IST midnight
+  and early IST morning). Not a code regression; `npm run check` still passes
+  those files because it does not include this test.
 
 ### Other gotchas
 - `npm run dev`/`npm run build` first run `predev`/`prebuild` = `scripts/sync-ort-assets.mjs`,
