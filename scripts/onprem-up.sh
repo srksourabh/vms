@@ -8,9 +8,7 @@ if ! docker info >/dev/null 2>&1; then
   exit 1
 fi
 npx supabase start
-if [ ! -f .env ]; then
-  echo "Missing .env — copy values from: npx supabase status" >&2
-  exit 1
-fi
+node scripts/write-local-env.mjs
+npx supabase migration up --local
 npm run seed
 exec npm run dev -- --host 0.0.0.0 --port 5173

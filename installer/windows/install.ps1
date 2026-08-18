@@ -33,6 +33,12 @@ if (-not (Test-Path .env)) {
 Write-Host 'Starting local Supabase (this keeps ALL visitor data on this machine)…'
 npx supabase start
 
+Write-Host 'Writing local API keys into .env…'
+node scripts/write-local-env.mjs
+
+Write-Host 'Applying any pending migrations…'
+npx supabase migration up --local
+
 Write-Host 'Installing Node packages…'
 npm install
 

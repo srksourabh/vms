@@ -215,6 +215,16 @@ npm run pack:win</code></pre>
     <tr><td>Admin</td><td>admin login</td><td>Settings → Roles &amp; Users to add people. Visitors Log / Reports for the book. Never check anyone in.</td></tr>
   </table>
   <p>Play the journey video once with the customer, then let a guard repeat it on a demo laptop with <code>staff.it@demo.vms</code> / <code>guard@demo.vms</code>.</p>
+
+  <h2>12. Server installation (short)</h2>
+  <p>The full instruction set is <code>docs/customer/SERVER-INSTALL.md</code>. First boot on the mall PC:</p>
+  <pre><code>npm install
+npx supabase start
+node scripts/write-local-env.mjs
+npx supabase migration up --local
+npm run seed
+npm run dev -- --host 0.0.0.0 --port 5173</code></pre>
+  <p>Windows: <code>installer\windows\Start-Server.bat</code>. Then the green-light <code>.exe</code> on each guard PC. Migrations through <strong>096</strong> (private photo bucket) must be applied; <code>migration up --local</code> is the command if you pull new SQL later.</p>
 </main>
 </body>
 </html>

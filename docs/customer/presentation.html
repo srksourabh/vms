@@ -79,6 +79,68 @@
 </section>
 
 <section class="slide">
+  <div class="kicker">Beat 1 · Employee</div>
+  <h2>Pre-register one visitor</h2>
+  <img src="assets/shots/e2e_1_employee_prereg_otp.jpg" alt="OTP minted" style="width:min(920px,100%);border-radius:12px;border:1px solid rgba(198,161,91,.28)" />
+  <p>staff.it@demo.vms → Visitors → Pre-Register. Name, mobile, email, slot, OK. Server returns a 6-digit OTP and VIS- ref.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Beat 2 · Visitor is coming</div>
+  <h2>OTP stays on the premises</h2>
+  <img src="assets/shots/ananya_otp_email.jpg" alt="Mailpit OTP" style="width:min(920px,100%);border-radius:12px;border:1px solid rgba(198,161,91,.28)" />
+  <p>Ananya Rao, OTP 454178, VIS-20260818-0011. Mailpit is the demo mailbox. Production uses mall SMTP. SMS is logged for a GSM gateway.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Beat 3 · Security desk</div>
+  <h2>Guard finds the visitor by OTP</h2>
+  <img src="assets/shots/ananya_otp_search.jpg" alt="OTP search" style="width:min(920px,100%);border-radius:12px;border:1px solid rgba(198,161,91,.28)" />
+  <p>Scan Pass → type six digits → record first, camera second. Host, department, purpose, phone are already on the card.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Beat 4 · Formalities</div>
+  <h2>ID, photograph, badge number</h2>
+  <img src="assets/shots/e2e_4_badge_issue.jpg" alt="Badge typed" style="width:min(920px,100%);border-radius:12px;border:1px solid rgba(198,161,91,.28)" />
+  <p>ID last-four + photo + physical card (e.g. B-218 / B-219). Check In stays disabled until all three exist. If OCR fails: Enter details from the card.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Beat 5 · Entering</div>
+  <h2>Checked in — on the fire-marshal list</h2>
+  <img src="assets/shots/ananya_checked_in.jpg" alt="Checked in" style="width:min(920px,100%);border-radius:12px;border:1px solid rgba(198,161,91,.28)" />
+  <p>Ananya checked in 09:31 IST, badge B-219, host Neha Gupta. Entry &amp; Exit shows her under Checked In until the card comes back.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Beat 6 · Time of return</div>
+  <h2>Type the badge — visit closes</h2>
+  <img src="assets/shots/ananya_checked_out.jpg" alt="Checked out" style="width:min(920px,100%);border-radius:12px;border:1px solid rgba(198,161,91,.28)" />
+  <p>Return a badge → B-219 → tick collected → check out. She leaves Checked In. The number is free for the next visitor.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Desktop client</div>
+  <h2>Green light means the building’s server is up</h2>
+  <img src="assets/shots/desktop_green_light.jpg" alt="Green light" style="width:min(920px,100%);border-radius:12px;border:1px solid rgba(198,161,91,.28)" />
+  <p>SecureGate-Portable.exe pings the web app and Auth. Green → Open Secure Gate → login. The .exe is not the database.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Install</div>
+  <h2>Server — first boot</h2>
+  <p>Docker + Node 20 on one PC. Then:</p>
+  <p><code>npm install</code></p>
+  <p><code>npx supabase start</code></p>
+  <p><code>node scripts/write-local-env.mjs</code></p>
+  <p><code>npx supabase migration up --local</code></p>
+  <p><code>npm run seed</code></p>
+  <p><code>npm run dev -- --host 0.0.0.0 --port 5173</code></p>
+  <p style="margin-top:16px">Windows: <code>installer\windows\Start-Server.bat</code>. Full runbook: <code>docs/customer/SERVER-INSTALL.md</code></p>
+</section>
+
+<section class="slide">
   <div class="kicker">Proof on localhost</div>
   <h2>The six beats, as captured</h2>
   <div class="grid">
@@ -231,6 +293,10 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(i + 1); }
     if (e.key === 'ArrowLeft') { e.preventDefault(); show(i - 1); }
+  });
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('a,button,input,textarea,select')) return;
+    show(e.clientX < window.innerWidth / 3 ? i - 1 : i + 1);
   });
 </script>
 </body>
