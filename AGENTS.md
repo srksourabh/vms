@@ -71,8 +71,8 @@ secrets are not required — `.env` uses the local `supabase start` demo JWTs.
   a real camera — the flow is otherwise unchanged.
 - `tests/unit/pages/AdminLiveCheckIn.test.tsx` is time-of-day flaky whenever a
   fixture stamped `hoursAgo(N)` falls before today's `istDayStart()` (IST midnight
-  and early IST morning). Not a code regression; `npm run check` still passes
-  those files because it does not include this test.
+  and early IST morning). It lives under `tests/unit`, so it can fail `npm run check`
+  in that window. Not a code regression — re-run after ~08:00 IST.
 
 ### Other gotchas
 - `npm run dev`/`npm run build` first run `predev`/`prebuild` = `scripts/sync-ort-assets.mjs`,
